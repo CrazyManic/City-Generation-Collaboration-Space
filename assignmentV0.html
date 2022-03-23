@@ -16,6 +16,7 @@
 <body>
     <!--include the three.js library-->
     <script src="js/three.js"></script>
+    <script src="js/Block.js"></script>
     <style>
 
         body {
@@ -59,13 +60,40 @@
         var Dir = new THREE.Vector3(0, 0, 1);
         camera.lookAt(Dir.x, Dir.y, Dir.z);
 
+        // Set game constants
+        var loadRadius = 80; //arbitrary and untested
+        console.log('Blocks grid size: ' + Block.gridSize); // I do not know how to access this from another file!
 
+        // Set game variables
+        var playerPos = new THREE.Vector3(0, 0, 0);
+        var playerLook = new THREE.Vector3(0, 0, -1);
+        var velo = new THREE.Vector3(0,0,0); //velocity
+        var accel = new THREE.Vector3(0,0,0);//acceleration
+
+        // Initialise blocks
+        var blocks = [];
 
         const clock = new THREE.Clock();
-        //var delta = clock.getDelta();
-        
-        var MyUpdateLoop = function () {
+        //var delta = clock.getDelta(); // use this as necessary, just not in this indentation block.
 
+        // Gameplay functions
+        function UpdatePlayerPosition() {
+            var delta = clock.getDelta();
+            // Make sure acceleration is up to date. 
+            // Apply friction, i.e acc += velo * -0.05
+            //velo.add(accel.multiplyScalar(delta); // should be correct
+            //playerPos.add(velo.multiplyScalar(delta));
+
+            for (i = 0; i < blocks.length; i++) {
+                if (blocks[i].position.distanceTo(playerPos) > loadRadius) { // Destroy this block
+
+                }
+            }
+        }
+
+        var MyUpdateLoop = function () {
+            // code
+            requestAnimationFrame(MyUpdateLoop);
         }
         requestAnimationFrame(MyUpdateLoop);
 
@@ -86,10 +114,62 @@
             renderer.render(scene, camera);
         };
 
-        
+        // Input
+        var onKeyDown = function (event) {
+
+            switch (event.keyCode) {
+                case 38: // up
+                case 87: // w
+                    playerPos.z += 10; // just to test movement. 
+                    break;
+
+                case 37: // left
+                case 65: // a
+                    
+                    break;
+
+                case 40: // down
+                case 83: // s
+                    
+                    break;
+
+                case 39: // right
+                case 68: // d
+                    
+                    break;
+            }
+
+        };
+
+        var onKeyUp = function (event) {
+
+            switch (event.keyCode) {
+                case 38: // up
+                case 87: // w
+                    
+                    break;
+
+                case 37: // left
+                case 65: // a
+                    
+                    break;
+
+                case 40: // down
+                case 83: // s
+                    
+                    break;
+
+                case 39: // right
+                case 68: // d
+                    
+                    break;
+            }
+        };
 
         //link the resize of the window to the update of the camera
         window.addEventListener('resize', MyResize);
+        document.addEventListener('keydown', onKeyDown, false);
+        document.addEventListener('keyup', onKeyUp, false);
 
 
     </script>
