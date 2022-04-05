@@ -19,6 +19,7 @@
     <script src="js/Block.js"></script>
     <script src="js/OrbitControls.js"></script>
     <script src="js/PLYLoader.js"></script>
+    <script src="js/dat.gui.min.js"></script>
     <style>
 
         body {
@@ -127,17 +128,17 @@
 
                 case 37: // left
                 case 65: // a
-                    
+                    playerPos.x += 10; 
                     break;
 
                 case 40: // down
                 case 83: // s
-                    
+                    playerPos.x -= 10;                         
                     break;
 
                 case 39: // right
                 case 68: // d
-                    
+                    playerPos.z -= 10;                    
                     break;
             }
 
