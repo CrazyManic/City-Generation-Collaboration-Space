@@ -7,7 +7,7 @@ class Block {
     constructor(position, scene) {
         // something from constructor about its vars
         this.position = position; //vec3
-
+        this.scene = scene;
         // foundation floor
         this.floorMaterial = new THREE.MeshLambertMaterial();
         this.floorMaterial.color = new THREE.Color(0.45, 0.45, 0.45);//
@@ -20,6 +20,15 @@ class Block {
         this.floor.position.x = position.x;
         this.floor.position.z = position.z;
         //this.floor.position = position;
+    }
+
+    destroy(){
+        this.scene.remove(this.floor);
+        delete this.floorMaterial;
+        delete this.floorGeometry;
+        delete this.floor;
+        delete this.position;
+        delete this;
     }
     
 }

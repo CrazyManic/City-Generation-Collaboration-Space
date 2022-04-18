@@ -54,9 +54,9 @@
         var camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 1000);
         // Camera is set to these for testing the generation of blocks. 
         // Should be closer to (0, -0.2, 1) in the game
-        camera.lookAt(0, -1, 0);// and the direction
+        camera.lookAt(0, -1, 0.1);// and the direction
         // for real game set it more like (0, 5, -15)
-        camera.position.set(0, 250, 15);//set the camera position
+        camera.position.set(0, 275, -15);//set the camera position
         var cameralight = new THREE.PointLight( new THREE.Color(1,1,1), 0.5 );
         camera.add( cameralight );
         scene.add(camera);
@@ -87,6 +87,8 @@
         // console.log(list.head);
         // console.log(list.getNodeAtIndex(5));
         // console.log(list.head.next.value);
+        // list.removeNodeAt(1);
+        // console.log(list.getNodeAtIndex(1));
         // // end test linked list
 
         // Initialise blocks
@@ -134,23 +136,24 @@
             //velo.add(accel.multiplyScalar(delta); // should be correct
             //playerPos.add(velo.multiplyScalar(delta));
 
-            for (i = 0; i < blocks.length; i++) {
-                if (blocks[i].position.distanceTo(playerPos) > loadRadius) { // Destroy this block
-
+            for (i = 0; i < blocks.size; i++) {
+                //console.log("Iterating pos x: " + blocks.getNodeAtIndex(i).position.x);
+                if (blocks.getNodeAtIndex(i).position.distanceTo(playerPos) >= loadRadius) { // Destroy this block
+                    blocks.getNodeAtIndex(i).destroy();
+                    blocks.removeNodeAt(i);
+                    i--;
                 }
             }
         }
-
-        var incrementor = 13;
-        console.log(blocks.getNodeAtIndex(incrementor).floor.position);
-        box.position.set(blocks.getNodeAtIndex(incrementor).position.x,blocks.getNodeAtIndex(incrementor).position.y,blocks.getNodeAtIndex(incrementor).position.z);
-        //box.position.set(0,120,0);
-        console.log(blocks.getNodeAtIndex(incrementor).position);
+        //blocks.getNodeAtIndex(2).destroy();
+        box.position.z = 50;
         var MyUpdateLoop = function () {
             // code
-            box.position.set(blocks.getNodeAtIndex(incrementor).position.x,blocks.getNodeAtIndex(incrementor).position.y,blocks.getNodeAtIndex(incrementor).position.z);
+            //box.position.set(blocks.getNodeAtIndex(incrementor).position.x,blocks.getNodeAtIndex(incrementor).position.y,blocks.getNodeAtIndex(incrementor).position.z);
             //console.log(blocks.getNodeAtIndex(incrementor).floor.position);
-            incrementor = (incrementor + 1) % blocks.size;
+            //incrementor = (incrementor + 1) % blocks.size;
+            box.position.z = playerPos.z;
+            UpdatePlayerPosition();
 
             renderer.render(scene, camera);
             requestAnimationFrame(MyUpdateLoop);
