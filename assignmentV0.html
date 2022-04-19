@@ -136,12 +136,40 @@
             //velo.add(accel.multiplyScalar(delta); // should be correct
             //playerPos.add(velo.multiplyScalar(delta));
 
+            // Delete blocks that are too far 
             for (i = 0; i < blocks.size; i++) {
                 //console.log("Iterating pos x: " + blocks.getNodeAtIndex(i).position.x);
                 if (blocks.getNodeAtIndex(i).position.distanceTo(playerPos) >= loadRadius) { // Destroy this block
                     blocks.getNodeAtIndex(i).destroy();
                     blocks.removeNodeAt(i);
                     i--;
+                }
+            }
+            // Generate new blocks
+            // TO DO does not stick to the grid correctly. 
+            for (y = intRad; y >= -intRad; y--){
+                for (x = intRad; x >= -intRad; x--){
+                    if ((x*x + y*y) <= intRad * intRad){
+                        var posUsed = false;
+                        var thisPos = new THREE.Vector3(x * gridSize, 0.0, y*gridSize).add(playerPos);
+                        for (i=0; i < blocks.size; i++){
+                            if (blocks.getNodeAtIndex(i).position.equals(thisPos)){
+                                posUsed = true;
+                                console.log("Block already occupied: ("+thisPos.x+','+thisPos.y+')');
+                            }
+                        }
+                        if (!posUsed){
+                            //console.log('(' + x + ',' + y+'): ('+ (x*gridSize) + ',' + (y*gridSize)+')');
+                            var newBlock = new Block(thisPos, scene);
+                            newBlock.position = thisPos;
+                            newBlock.floor.position = thisPos;
+                            blocks.addNodeAtTail(newBlock);
+                            console.log("Adding new block at ("+thisPos.x+','+thisPos.y+')');
+                            //console.log("floor.pos: " + newBlock.floor.position + " pos: " + newBlock.position);
+                        }
+                    }
+                    //else
+                    //    console.log('NOT (' + x + ',' + y+')');
                 }
             }
         }
