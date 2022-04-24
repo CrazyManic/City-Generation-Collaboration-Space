@@ -20,6 +20,7 @@
     <script src="js/LinkedList.js"></script>
     <script src="js/OrbitControls.js"></script>
     <script src="js/PLYLoader.js"></script>
+    <script src="js/Buildings.js"></script>
     <style>
 
         body {
@@ -56,7 +57,7 @@
         // Should be closer to (0, -0.2, 1) in the game
         camera.lookAt(0, -1, 0.1);// and the direction
         // for real game set it more like (0, 5, -15)
-        camera.position.set(0, 275, -15);//set the camera position
+        camera.position.set(0, 275, -90);//set the camera position
         var cameralight = new THREE.PointLight( new THREE.Color(1,1,1), 0.5 );
         camera.add( cameralight );
         scene.add(camera);
@@ -73,9 +74,10 @@
 
         // Set game variables
         var playerPos = new THREE.Vector3(0, 0, 0);
-        var playerLook = new THREE.Vector3(0, 0, -1);
+        var playerLook = new THREE.Vector3(0, 0, 0);
         var velo = new THREE.Vector3(0,0,0); //velocity
         var accel = new THREE.Vector3(0,0,0);//acceleration
+
 
         // // testing linked list
         // var list = new LinkedList();
@@ -179,6 +181,12 @@
         }
         //blocks.getNodeAtIndex(2).destroy();
         box.position.z = 50;
+
+
+        // generating new buildings
+        makenew_building(new THREE.Vector3(0, 0, 0), 50);
+
+
         var MyUpdateLoop = function () {
             // code
             //box.position.set(blocks.getNodeAtIndex(incrementor).position.x,blocks.getNodeAtIndex(incrementor).position.y,blocks.getNodeAtIndex(incrementor).position.z);
