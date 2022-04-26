@@ -2,6 +2,7 @@
 // Constants
 const gridSize = 20; // arbitrary and untested, feel free to change
 const streetWidth = 5;
+const buildingWidth = gridSize - streetWidth;
 
 class Block {
     constructor(position, scene) {
@@ -15,11 +16,33 @@ class Block {
         this.floorGeometry = new THREE.PlaneGeometry(gridSize, gridSize, 1, 1);
         this.floor = new THREE.Mesh(this.floorGeometry, this.floorMaterial);
         scene.add(this.floor);
-        this.floor.rotation.x = -Math.PI / 2;
+        var flatRotation = -Math.PI / 2;
+        this.floor.rotation.x = flatRotation;
         this.floor.position.y = position.y;
         this.floor.position.x = position.x;
         this.floor.position.z = position.z;
         //this.floor.position = position;
+        this.roadGeoLong = new THREE.PlaneGeometry(streetWidth,gridSize);
+        this.roadGeoShort = new THREE.PlaneGeometry(gridSize - streetWidth, streetWidth);
+        this.roadColour = new THREE.Color(0.1,0.1,0.1);
+        this.roadMat = new THREE.MeshLambertMaterial();
+        this.roadMat.color = this.roadColour;
+        this.roadPlanes = [];
+        for (var i=0; i<4; i++){
+            var roadMesh;
+            if (i<2){ // long roads along z axis
+                roadMesh = new THREE.Mesh(this.roadGeoLong, this.roadMat);
+                roadMesh.position.set(this.position.x, this.position.y, this.position.z);
+                roadMesh.position.x += (i%2==0?1:-1) * gridSize / 2;
+            } else {  // short roads along x asix
+                roadMesh = new THREE.Mesh(this.roadGeoShort, this.roadMat);
+                roadMesh.position.set(this.position.x, this.position.y, this.position.z);
+                roadMesh.position.z += (i%2==0?1:-1) * gridSize / 2;
+            }
+            roadMesh.rotation.x = flatRotation;
+            this.roadPlanes.push(roadMesh);
+            scene.add(roadMesh);
+        }
     }
 
     destroy(){
@@ -28,6 +51,10 @@ class Block {
         delete this.floorGeometry;
         delete this.floor;
         delete this.position;
+        for (var i=3; i >= 0; i--){
+            this.scene.remove(this.roadPlanes[i]);
+            delete this.roadPlanes[i].object;
+        }
         delete this;
     }
     
