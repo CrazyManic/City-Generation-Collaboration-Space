@@ -55,9 +55,11 @@
         var camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 1000);
         // Camera is set to these for testing the generation of blocks. 
         // Should be closer to (0, -0.2, 1) in the game
-        camera.lookAt(0, -1, 0.1);// and the direction
+        var cameraDirection = new THREE.Vector3(0, -1, 0.1);
+        camera.lookAt(cameraDirection.x, cameraDirection.y, cameraDirection.z);// and the direction
         // for real game set it more like (0, 5, -15)
-        camera.position.set(0, 275, -15);//set the camera position
+        var cameraPosition = new THREE.Vector3(0, 275, -15);
+        camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);//set the camera position
         var cameralight = new THREE.PointLight( new THREE.Color(1,1,1), 0.5 );
         camera.add( cameralight );
         scene.add(camera);
@@ -133,6 +135,7 @@
             return new THREE.Vector3(Math.round(inVec.x / gridSize) * gridSize, Math.round(inVec.y / gridSize) * gridSize, Math.round(inVec.z / gridSize) * gridSize, );
         }
 
+
         // Gameplay functions
         function UpdatePlayerPosition() {
             var delta = clock.getDelta();
@@ -177,15 +180,73 @@
                     //    console.log('NOT (' + x + ',' + y+')');
                 }
             }
+
         }
+
+        var turnRight = false;
+        var turnLeft = false;
+        var goDirForward = false;
+        var goDirBackward = false;
         //blocks.getNodeAtIndex(2).destroy();
         box.position.z = 50;
+        // Need to figure out which number we need for offset
+        var cameraOffset = -15;
+        var cameraSpeed = 2;
         var MyUpdateLoop = function () {
             // code
+
+            //turning code (This is just a code to get started when we do rotations)
+            // var delta = clock.getDelta();
+
+            // if (turnRight = true) 
+            // {
+            //     rotationAngle -= cameraSpeed * delta;
+            //     cameraDirection.x = Math.sin(rotationAngle);
+            //     playerLook.x = Math.sin(rotationAngle);
+            //     cameraDirection.z = Math.cos(rotationAngle);
+            //     playerLook.z = Math.cos(rotationAngle);
+            //     cameraDirection.normalize();
+            //     playerLook.normalize();   
+            // }
+            // if (turnLeft = true)
+            // {
+            //     rotationAngle += cameraSpeed * delta;
+            //     cameraDirection.x = Math.sin(rotationAngle);
+            //     playerLook.x = Math.sin(rotationAngle);
+            //     cameraDirection.z = Math.cos(rotationAngle);
+            //     playerLook.z = Math.cos(rotationAngle);
+            //     cameraDirection.normalize();
+            //     playerLook.normalize(); 
+            // }
+            // if (goDirForward = true)
+            // {
+            //     cameraPosition.x += cameraDirection.x*speed;
+            //     cameraPosition.z += cameraDirection.z*speed;
+            //     playerPos.x += playerLook.x*speed;
+            //     playerPos.z += playerLook.z*speed;
+            // } 
+            // if (goDirBackward = true)
+            // {
+            //     cameraPosition.x -= cameraDirection.x*speed;
+            //     cameraPosition.z -= cameraDirection.z*speed;
+            //     playerPos.x -= playerLook.x*speed;
+            //     playerPos.z -= playerLook.z*speed;
+            // }
+
             //box.position.set(blocks.getNodeAtIndex(incrementor).position.x,blocks.getNodeAtIndex(incrementor).position.y,blocks.getNodeAtIndex(incrementor).position.z);
             //console.log(blocks.getNodeAtIndex(incrementor).floor.position);
             //incrementor = (incrementor + 1) % blocks.size;
             box.position.z = playerPos.z;
+
+            box.position.x = playerPos.x;
+
+            //setting camera position to the player
+            cameraPosition.z = playerPos.z + cameraOffset;
+
+            cameraPosition.x = playerPos.x;
+
+            camera.position.set(cameraPosition.x,cameraPosition.y, cameraPosition.z);
+
             UpdatePlayerPosition();
 
             renderer.render(scene, camera);
@@ -216,22 +277,26 @@
             switch (event.keyCode) {
                 case 38: // up
                 case 87: // w
-                    playerPos.z += 10; // just to test movement. 
+                    playerPos.z += 2; // just to test movement. 
+                    // goDirForward = true;
                     break;
 
                 case 37: // left
                 case 65: // a
-                    
+                    playerPos.x += 2;
+                    // turnLeft = true;
                     break;
 
                 case 40: // down
                 case 83: // s
-                    
+                    playerPos.z -= 2;
+                    // goDirBackward = true; 
                     break;
 
                 case 39: // right
                 case 68: // d
-                    
+                    playerPos.x -= 2;
+                    // turnRight = true;
                     break;
             }
 
@@ -263,18 +328,15 @@
         };
 
         //link the resize of the window to the update of the camera
-        window.addEventListener('resize', MyResize);
         document.addEventListener('keydown', onKeyDown, false);
         document.addEventListener('keyup', onKeyUp, false);
 
         function buildGui()
         {
             gui = new dat.GUI();
-            
             //this is just a placeholder 
             var params = {PlayerPositionZ: playerPos.z,
-                PlayerPositionX: playerPos.x,
-                PlayerPositionY: playerPos.y}
+                PlayerPositionX: playerPos.x}
 
             gui.add( params, 'PlayerPositionZ', 0, 150 ).onChange( function ( val ) {
                 playerPos.z = val;
@@ -284,18 +346,22 @@
                 playerPos.x = val;
             });
 
-            gui.add( params, 'PlayerPositionY', 0, 150 ).onChange( function ( val ) {
-                playerPos.y = val;
-            });
-            //playerholder ends here!
-
             gui.open();
 
         }
 
         buildGui();
 
+        function onWindowResize() 
+        {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        window.addEventListener( 'resize', onWindowResize, false );
+
 
     </script>
 </body>
 </html>
+
