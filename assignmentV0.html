@@ -21,6 +21,7 @@
     <script src="js/OrbitControls.js"></script>
     <script src="js/PLYLoader.js"></script>
     <script src="js/dat.gui.min.js"></script>
+    <script src="js/dat.gui.min.js"></script>
     <style>
 
         body {
@@ -72,11 +73,19 @@
         var loadRadius = gridSize * 6.5;
         console.log('Blocks grid size: ' + gridSize); 
 
-        // Set game variables
+        // Set player variables
         var playerPos = new THREE.Vector3(0, 0, 0);
         var playerLook = new THREE.Vector3(0, 0, -1);
         var velo = new THREE.Vector3(0,0,0); //velocity
         var accel = new THREE.Vector3(0,0,0);//acceleration
+
+
+        //planned parameter for the town generation
+        var greeneryToBuildingRatio = 0.5;
+        var structureHeight = 0.5;
+        var season = 0;
+
+
 
         // // testing linked list
         // var list = new LinkedList();
@@ -141,7 +150,7 @@
             //velo.add(accel.multiplyScalar(delta); // should be correct
             //playerPos.add(velo.multiplyScalar(delta));
 
-            // Delete blocks that are too far 
+            // Delete blocks that are too far
             for (i = 0; i < blocks.size; i++) {
                 //console.log("Iterating pos x: " + blocks.getNodeAtIndex(i).position.x);
                 if (blocks.getNodeAtIndex(i).position.distanceTo(playerPos) >= loadRadius) { // Destroy this block
@@ -150,6 +159,8 @@
                     i--;
                 }
             }
+
+
             // Generate new blocks
             // TO DO does not stick to the grid correctly. 
             for (y = intRad; y >= -intRad; y--){
@@ -186,6 +197,7 @@
             //console.log(blocks.getNodeAtIndex(incrementor).floor.position);
             //incrementor = (incrementor + 1) % blocks.size;
             box.position.z = playerPos.z;
+            box.position.x = playerPos.x;
             UpdatePlayerPosition();
 
             renderer.render(scene, camera);
@@ -221,17 +233,17 @@
 
                 case 37: // left
                 case 65: // a
-                    
+                    playerPos.x += 10;    
                     break;
 
                 case 40: // down
                 case 83: // s
-                    
+                    playerPos.z -= 10;
                     break;
 
                 case 39: // right
                 case 68: // d
-                    
+                    playerPos.x -= 10;
                     break;
             }
 
@@ -273,20 +285,40 @@
             
             //this is just a placeholder 
             var params = {PlayerPositionZ: playerPos.z,
-                PlayerPositionX: playerPos.x,
-                PlayerPositionY: playerPos.y}
+                PlayerPositionX: playerPos.x, //PlayerPositionY: playerPos.y
+                GreeneryToBuildingRatio: greeneryToBuildingRatio,
+                StructureHeight: structureHeight,
+                Season: season
+            }
 
-            gui.add( params, 'PlayerPositionZ', 0, 150 ).onChange( function ( val ) {
+            var player = gui.addFolder('Player Parameter')
+            player.add( params, 'PlayerPositionZ', -75, 75 ).onChange( function ( val ) {
                 playerPos.z = val;
             });
 
-            gui.add( params, 'PlayerPositionX', 0, 150 ).onChange( function ( val ) {
-                playerPos.x = val;
+            player.add( params, 'PlayerPositionX', -75, 75 ).onChange( function ( val ) {
+                playerPos.x = -val;
             });
 
-            gui.add( params, 'PlayerPositionY', 0, 150 ).onChange( function ( val ) {
-                playerPos.y = val;
+
+            var gen = gui.addFolder('Generation Paramater');
+            gen.add( params, 'GreeneryToBuildingRatio', 0, 1 ).onChange( function ( val ) {
+                //update the parameters of the next structure generated
             });
+
+            gen.add( params, 'StructureHeight', 0, 1 ).onChange( function ( val ) {
+                //update the parameters of the next structure generated
+            });
+
+            gen.add( params, 'Season', { Summer: 0, Autumn: 1, Spring: 2, Winter: 3} ).onChange( function ( val ) {
+                //update the parameters of the next structure generated
+            });
+
+
+            //playerpos.y is kinda useless cus we're not planning to have player fly
+            // gui.add( params, 'PlayerPositionY', 0, 150 ).onChange( function ( val ) {
+            //     playerPos.y = val;
+            // });
             //playerholder ends here!
 
             gui.open();
