@@ -19,10 +19,13 @@ class Block {
         scene.add(this.floor);
         var flatRotation = -Math.PI / 2;
         this.floor.rotation.x = flatRotation;
-        this.floor.position.y = position.y;
-        this.floor.position.x = position.x;
-        this.floor.position.z = position.z;
-        //this.floor.position = position;
+        this.floor.position.set(this.position.x, this.position.y, this.position.z);
+
+        // Building
+        var randCol = new THREE.Color(Math.random(), Math.random(), Math.random());
+        this.building = new Building(cur_urbanness, this.position, randCol);
+        
+        // Roads
         this.roadGeoLong = new THREE.PlaneGeometry(streetWidth,gridSize);
         this.roadGeoShort = new THREE.PlaneGeometry(gridSize - streetWidth, streetWidth);
         this.stripGeo = new THREE.PlaneGeometry((gridSize - streetWidth) / 2, streetWidth / 6);
@@ -65,6 +68,7 @@ class Block {
 
     destroy(){
         this.scene.remove(this.floor);
+        this.building.Destroy();
         delete this.floorMaterial;
         delete this.floorGeometry;
         delete this.floor;

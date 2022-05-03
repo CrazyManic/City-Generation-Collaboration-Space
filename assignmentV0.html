@@ -79,6 +79,9 @@
         var velo = new THREE.Vector3(0,0,0); //velocity
         var accel = new THREE.Vector3(0,0,0);//acceleration
 
+        // Generation amounts
+        var cur_urbanness = 50;
+
 
         // // testing linked list
         // var list = new LinkedList();
@@ -185,9 +188,9 @@
 
 
         // generating new buildings
-        var bldg_1 = new Building(100 ,new THREE.Vector3(0, 0, 0), new THREE.Color(1,0,0)); // Red, very urban
-        var bldg_2 = new Building(0, new THREE.Vector3(30, 0, 0), new THREE.Color(0,1,0));  // Green, not at all urban
-        var bldg_3 = new Building(30, new THREE.Vector3(60, 0, 0), new THREE.Color(0,0,1)); // Blue, sometimes highrise, usually not
+        //var bldg_1 = new Building(100 ,new THREE.Vector3(0, 0, 0), new THREE.Color(1,0,0)); // Red, very urban
+        //var bldg_2 = new Building(0, new THREE.Vector3(30, 0, 0), new THREE.Color(0,1,0));  // Green, not at all urban
+        //var bldg_3 = new Building(30, new THREE.Vector3(60, 0, 0), new THREE.Color(0,0,1)); // Blue, sometimes highrise, usually not
 
 
         var MyUpdateLoop = function () {
