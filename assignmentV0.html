@@ -20,6 +20,7 @@
     <script src="js/LinkedList.js"></script>
     <script src="js/OrbitControls.js"></script>
     <script src="js/PLYLoader.js"></script>
+    <script src="js/Buildings.js"></script>
     <script src="js/dat.gui.min.js"></script>
     <style>
 
@@ -74,9 +75,10 @@
 
         // Set game variables
         var playerPos = new THREE.Vector3(0, 0, 0);
-        var playerLook = new THREE.Vector3(0, 0, -1);
+        var playerLook = new THREE.Vector3(0, 0, 0);
         var velo = new THREE.Vector3(0,0,0); //velocity
         var accel = new THREE.Vector3(0,0,0);//acceleration
+
 
         // // testing linked list
         // var list = new LinkedList();
@@ -180,6 +182,14 @@
         }
         //blocks.getNodeAtIndex(2).destroy();
         box.position.z = 50;
+
+
+        // generating new buildings
+        var bldg_1 = new Building(100 ,new THREE.Vector3(0, 0, 0), new THREE.Color(1,0,0)); // Red, very urban
+        var bldg_2 = new Building(0, new THREE.Vector3(30, 0, 0), new THREE.Color(0,1,0));  // Green, not at all urban
+        var bldg_3 = new Building(30, new THREE.Vector3(60, 0, 0), new THREE.Color(0,0,1)); // Blue, sometimes highrise, usually not
+
+
         var MyUpdateLoop = function () {
             // code
             //box.position.set(blocks.getNodeAtIndex(incrementor).position.x,blocks.getNodeAtIndex(incrementor).position.y,blocks.getNodeAtIndex(incrementor).position.z);
