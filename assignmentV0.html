@@ -20,6 +20,7 @@
     <script src="js/LinkedList.js"></script>
     <script src="js/OrbitControls.js"></script>
     <script src="js/PLYLoader.js"></script>
+    <script src="js/Buildings.js"></script>
     <script src="js/dat.gui.min.js"></script>
     <style>
 
@@ -58,7 +59,7 @@
         var cameraDirection = new THREE.Vector3(0, -1, 0.1);
         camera.lookAt(cameraDirection.x, cameraDirection.y, cameraDirection.z);// and the direction
         // for real game set it more like (0, 5, -15)
-        var cameraPosition = new THREE.Vector3(0, 275, -15);
+        var cameraPosition = new THREE.Vector3(0, 150, -25);
         camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);//set the camera position
         var cameralight = new THREE.PointLight( new THREE.Color(1,1,1), 0.5 );
         camera.add( cameralight );
@@ -66,7 +67,7 @@
 
         var boxMat = new THREE.MeshLambertMaterial();
         boxMat.color = new THREE.Color(0.6, 0.3, 0.0, 1.0);
-        var box = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), boxMat);
+        var box = new THREE.Mesh(new THREE.BoxGeometry(1,1,2), boxMat);
         box.position.set(1,0,1);
         scene.add(box);
         
@@ -76,9 +77,25 @@
 
         // Set game variables
         var playerPos = new THREE.Vector3(0, 0, 0);
-        var playerLook = new THREE.Vector3(0, 0, -1);
+        var playerLook = new THREE.Vector3(0, 0, 0);
         var velo = new THREE.Vector3(0,0,0); //velocity
         var accel = new THREE.Vector3(0,0,0);//acceleration
+
+        // Generation amounts
+        var cur_urbanness = 50;
+
+        // movement variables
+        var turnRight = false;
+        var turnLeft = false;
+        var goDirForward = false;
+        var goDirBackward = false;
+
+
+        // Not sure how to use these for the camera code
+        // var flatOffset = new THREE.Vector3(0, 0, 0);
+        // var vertOffset = new THREE.Vector3(0, 0, 0);
+
+
 
         // // testing linked list
         // var list = new LinkedList();
@@ -111,11 +128,12 @@
                 //    console.log('NOT (' + x + ',' + y+')');
             }
         }
-        console.log(blocks.head.value.floor.position);
-        console.log(blocks.head.next.value.floor.position);
-        console.log(blocks.head.next.next.value.floor.position);
+        //console.log(blocks.head.value.floor.position);
+        //console.log(blocks.head.next.value.floor.position);
+        //console.log(blocks.head.next.next.value.floor.position);
         //box.position.set(blocks.head.next.next.value.floor.position);
         box.position.set(0,120,-10);
+        
         //camera.lookAt(blocks.head.next.next.value.floor.position);
         // for (rows=intRad; rows >= -intRad; rows--){
         //     //var theta = Math.asin(rows/intRad);
@@ -135,7 +153,6 @@
             return new THREE.Vector3(Math.round(inVec.x / gridSize) * gridSize, Math.round(inVec.y / gridSize) * gridSize, Math.round(inVec.z / gridSize) * gridSize, );
         }
 
-
         // Gameplay functions
         function UpdatePlayerPosition() {
             var delta = clock.getDelta();
@@ -147,14 +164,13 @@
             // Delete blocks that are too far 
             for (i = 0; i < blocks.size; i++) {
                 //console.log("Iterating pos x: " + blocks.getNodeAtIndex(i).position.x);
-                if (blocks.getNodeAtIndex(i).position.distanceTo(playerPos) >= loadRadius) { // Destroy this block
+                if (blocks.getNodeAtIndex(i).position.distanceTo(ConvertToGrid(playerPos)) >= loadRadius) { // Destroy this block
                     blocks.getNodeAtIndex(i).destroy();
                     blocks.removeNodeAt(i);
                     i--;
                 }
             }
             // Generate new blocks
-            // TO DO does not stick to the grid correctly. 
             for (y = intRad; y >= -intRad; y--){
                 for (x = intRad; x >= -intRad; x--){
                     if ((x*x + y*y) <= intRad * intRad){
@@ -180,8 +196,16 @@
                     //    console.log('NOT (' + x + ',' + y+')');
                 }
             }
-
+            //console.log(blocks.size);
         }
+        //blocks.getNodeAtIndex(2).destroy();
+        box.position.z = 50;
+
+
+        // generating new buildings
+        //var bldg_1 = new Building(100 ,new THREE.Vector3(0, 0, 0), new THREE.Color(1,0,0)); // Red, very urban
+        //var bldg_2 = new Building(0, new THREE.Vector3(30, 0, 0), new THREE.Color(0,1,0));  // Green, not at all urban
+        //var bldg_3 = new Building(30, new THREE.Vector3(60, 0, 0), new THREE.Color(0,0,1)); // Blue, sometimes highrise, usually not
 
         var turnRight = false;
         var turnLeft = false;
@@ -191,62 +215,67 @@
         box.position.z = 50;
         // Need to figure out which number we need for offset
         var cameraOffset = -15;
-        var cameraSpeed = 2;
+        var rotationSpeed = 5;
+        //yeah we need to change movespeed to acceleration or something
+        var moveSpeed = 40;
+        var rotationAngle = 0;
+
         var MyUpdateLoop = function () {
             // code
 
             //turning code (This is just a code to get started when we do rotations)
-            // var delta = clock.getDelta();
+            var delta = clock.getDelta();
 
-            // if (turnRight = true) 
-            // {
-            //     rotationAngle -= cameraSpeed * delta;
-            //     cameraDirection.x = Math.sin(rotationAngle);
-            //     playerLook.x = Math.sin(rotationAngle);
-            //     cameraDirection.z = Math.cos(rotationAngle);
-            //     playerLook.z = Math.cos(rotationAngle);
-            //     cameraDirection.normalize();
-            //     playerLook.normalize();   
-            // }
-            // if (turnLeft = true)
-            // {
-            //     rotationAngle += cameraSpeed * delta;
-            //     cameraDirection.x = Math.sin(rotationAngle);
-            //     playerLook.x = Math.sin(rotationAngle);
-            //     cameraDirection.z = Math.cos(rotationAngle);
-            //     playerLook.z = Math.cos(rotationAngle);
-            //     cameraDirection.normalize();
-            //     playerLook.normalize(); 
-            // }
-            // if (goDirForward = true)
-            // {
-            //     cameraPosition.x += cameraDirection.x*speed;
-            //     cameraPosition.z += cameraDirection.z*speed;
-            //     playerPos.x += playerLook.x*speed;
-            //     playerPos.z += playerLook.z*speed;
-            // } 
-            // if (goDirBackward = true)
-            // {
-            //     cameraPosition.x -= cameraDirection.x*speed;
-            //     cameraPosition.z -= cameraDirection.z*speed;
-            //     playerPos.x -= playerLook.x*speed;
-            //     playerPos.z -= playerLook.z*speed;
-            // }
+            if (turnRight == true) 
+            {
+                rotationAngle -= rotationSpeed * delta;
+                playerLook.x = Math.sin(rotationAngle);
+                playerLook.z = Math.cos(rotationAngle);
+                playerLook.normalize();
+            }
+            if (turnLeft == true)
+            {
+                rotationAngle += rotationSpeed * delta;
+                playerLook.x = Math.sin(rotationAngle);
+                playerLook.z = Math.cos(rotationAngle);
+                playerLook.normalize(); 
+            }
+            if (goDirForward == true)
+            {
+                playerPos.x += playerLook.x*moveSpeed*delta;
+                playerPos.z += playerLook.z*moveSpeed*delta;
+            } 
+            if (goDirBackward == true)
+            {
+                playerPos.x -= playerLook.x*moveSpeed*delta;
+                playerPos.z -= playerLook.z*moveSpeed*delta;
+            }
 
             //box.position.set(blocks.getNodeAtIndex(incrementor).position.x,blocks.getNodeAtIndex(incrementor).position.y,blocks.getNodeAtIndex(incrementor).position.z);
             //console.log(blocks.getNodeAtIndex(incrementor).floor.position);
             //incrementor = (incrementor + 1) % blocks.size;
+
             box.position.z = playerPos.z;
+            console.log(rotationAngle * (180/Math.PI));
+            
+            box.rotation.y = playerLook.z;
+            box.rotation.y = playerLook.x;
+
 
             box.position.x = playerPos.x;
 
-            //setting camera position to the player
-            cameraPosition.z = playerPos.z + cameraOffset;
-
+            cameraPosition.z = playerPos.z - 2.5;
+            
             cameraPosition.x = playerPos.x;
 
-            camera.position.set(cameraPosition.x,cameraPosition.y, cameraPosition.z);
 
+            //setting camera position to the player
+
+            // not sure what to do about the camera angle 
+            // cameraPosition = playerPos - flatOffset * playerLook + vertOffset; 
+            
+            camera.position.set(cameraPosition.x,cameraPosition.y, cameraPosition.z);
+            camera.updateProjectionMatrix();
             UpdatePlayerPosition();
 
             renderer.render(scene, camera);
@@ -277,26 +306,24 @@
             switch (event.keyCode) {
                 case 38: // up
                 case 87: // w
-                    playerPos.z += 2; // just to test movement. 
-                    // goDirForward = true;
+                    // just to test movement.
+                    goDirForward = true;
                     break;
 
                 case 37: // left
                 case 65: // a
-                    playerPos.x += 2;
-                    // turnLeft = true;
+                    turnLeft = true;
                     break;
 
                 case 40: // down
                 case 83: // s
-                    playerPos.z -= 2;
-                    // goDirBackward = true; 
+                    goDirBackward = true;
+                    cameraSpeed = 4; 
                     break;
 
                 case 39: // right
                 case 68: // d
-                    playerPos.x -= 2;
-                    // turnRight = true;
+                    turnRight = true;
                     break;
             }
 
@@ -307,36 +334,40 @@
             switch (event.keyCode) {
                 case 38: // up
                 case 87: // w
-                    // goDirForward = false;
+                    goDirForward = false;
                     break;
 
                 case 37: // left
                 case 65: // a
-                    // turnLeft = false;                    
+                    turnLeft = false;                    
                     break;
 
                 case 40: // down
                 case 83: // s
-                    // goDirBackward = false; 
+                    goDirBackward = false; 
+                    cameraSpeed = 10; 
                     break;
 
                 case 39: // right
                 case 68: // d
-                    // turnRight = false;                    
+                    turnRight = false;                    
                     break;
             }
         };
 
         //link the resize of the window to the update of the camera
+        window.addEventListener('resize', MyResize);
         document.addEventListener('keydown', onKeyDown, false);
         document.addEventListener('keyup', onKeyUp, false);
 
         function buildGui()
         {
             gui = new dat.GUI();
+            
             //this is just a placeholder 
             var params = {PlayerPositionZ: playerPos.z,
-                PlayerPositionX: playerPos.x}
+                PlayerPositionX: playerPos.x,
+                PlayerPositionY: playerPos.y}
 
             gui.add( params, 'PlayerPositionZ', 0, 150 ).onChange( function ( val ) {
                 playerPos.z = val;
@@ -345,6 +376,7 @@
             gui.add( params, 'PlayerPositionX', 0, 150 ).onChange( function ( val ) {
                 playerPos.x = val;
             });
+            //playerholder ends here!
 
             gui.open();
 
@@ -364,4 +396,5 @@
     </script>
 </body>
 </html>
+
 
