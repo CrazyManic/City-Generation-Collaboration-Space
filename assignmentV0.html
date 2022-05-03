@@ -21,6 +21,7 @@
     <script src="js/OrbitControls.js"></script>
     <script src="js/PLYLoader.js"></script>
     <script src="js/Buildings.js"></script>
+    <script src="js/dat.gui.min.js"></script>
     <style>
 
         body {
@@ -57,8 +58,8 @@
         // Should be closer to (0, -0.2, 1) in the game
         camera.lookAt(0, -1, 0.1);// and the direction
         // for real game set it more like (0, 5, -15)
-        camera.position.set(0, 275, -90);//set the camera position
-        var cameralight = new THREE.PointLight( new THREE.Color(1,1,1), 0.5 );
+        camera.position.set(0, 275, -15);//set the camera position
+        var cameralight = new THREE.PointLight( new THREE.Color(1,1,1), 1 );
         camera.add( cameralight );
         scene.add(camera);
 
@@ -110,9 +111,9 @@
                 //    console.log('NOT (' + x + ',' + y+')');
             }
         }
-        console.log(blocks.head.value.floor.position);
-        console.log(blocks.head.next.value.floor.position);
-        console.log(blocks.head.next.next.value.floor.position);
+        //console.log(blocks.head.value.floor.position);
+        //console.log(blocks.head.next.value.floor.position);
+        //console.log(blocks.head.next.next.value.floor.position);
         //box.position.set(blocks.head.next.next.value.floor.position);
         box.position.set(0,120,-10);
         //camera.lookAt(blocks.head.next.next.value.floor.position);
@@ -145,14 +146,13 @@
             // Delete blocks that are too far 
             for (i = 0; i < blocks.size; i++) {
                 //console.log("Iterating pos x: " + blocks.getNodeAtIndex(i).position.x);
-                if (blocks.getNodeAtIndex(i).position.distanceTo(playerPos) >= loadRadius) { // Destroy this block
+                if (blocks.getNodeAtIndex(i).position.distanceTo(ConvertToGrid(playerPos)) >= loadRadius) { // Destroy this block
                     blocks.getNodeAtIndex(i).destroy();
                     blocks.removeNodeAt(i);
                     i--;
                 }
             }
             // Generate new blocks
-            // TO DO does not stick to the grid correctly. 
             for (y = intRad; y >= -intRad; y--){
                 for (x = intRad; x >= -intRad; x--){
                     if ((x*x + y*y) <= intRad * intRad){
@@ -178,6 +178,7 @@
                     //    console.log('NOT (' + x + ',' + y+')');
                 }
             }
+            //console.log(blocks.size);
         }
         //blocks.getNodeAtIndex(2).destroy();
         box.position.z = 50;
@@ -275,6 +276,34 @@
         window.addEventListener('resize', MyResize);
         document.addEventListener('keydown', onKeyDown, false);
         document.addEventListener('keyup', onKeyUp, false);
+
+        function buildGui()
+        {
+            gui = new dat.GUI();
+            
+            //this is just a placeholder 
+            var params = {PlayerPositionZ: playerPos.z,
+                PlayerPositionX: playerPos.x,
+                PlayerPositionY: playerPos.y}
+
+            gui.add( params, 'PlayerPositionZ', 0, 150 ).onChange( function ( val ) {
+                playerPos.z = val;
+            });
+
+            gui.add( params, 'PlayerPositionX', 0, 150 ).onChange( function ( val ) {
+                playerPos.x = val;
+            });
+
+            gui.add( params, 'PlayerPositionY', 0, 150 ).onChange( function ( val ) {
+                playerPos.y = val;
+            });
+            //playerholder ends here!
+
+            gui.open();
+
+        }
+
+        buildGui();
 
 
     </script>
