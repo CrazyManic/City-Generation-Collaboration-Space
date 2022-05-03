@@ -6,6 +6,7 @@ const buildingWidth = gridSize - streetWidth;
 
 class Block {
     constructor(position, scene) {
+        //console.log("Building a block");
         // something from constructor about its vars
         this.position = position; //vec3
         this.scene = scene;
