@@ -58,7 +58,7 @@
         camera.lookAt(0, -1, 0.1);// and the direction
         // for real game set it more like (0, 5, -15)
         camera.position.set(0, 275, -15);//set the camera position
-        var cameralight = new THREE.PointLight( new THREE.Color(1,1,1), 0.5 );
+        var cameralight = new THREE.PointLight( new THREE.Color(1,1,1), 1 );
         camera.add( cameralight );
         scene.add(camera);
 
