@@ -51,7 +51,6 @@ class Building{
         //     this.buildingType = 0;
         // }
         var singlehouseLength = blockLength - (blockLengthOffset * Math.random());
-
         this.height = building_baseheight[0] + randExtraHeight * Math.random() *2; // 2x for more varied building height
         // * building_height_randomness[this.buildingType] * Math.random()
         // would be good to add some random variation

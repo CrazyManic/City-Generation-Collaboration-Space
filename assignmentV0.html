@@ -21,6 +21,8 @@
     <script src="js/OrbitControls.js"></script>
     <script src="js/PLYLoader.js"></script>
     <script src="js/Buildings.js"></script>
+    <script src="js/FarmBuilding.js"></script>
+    <script src="js/HighriseBuilding.js"></script>
     <script src="js/dat.gui.min.js"></script>
     <style>
 
@@ -49,19 +51,48 @@
         //add the renderer to the current document
         document.body.appendChild(renderer.domElement);
         var ratio = window.innerWidth / window.innerHeight;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
 
         // Background color should be turned off but makes things very visible
         scene.background = new THREE.Color(new THREE.Color(0.3, 0.6, 0.0, 1.0));
         //create the perspective camera
-        var camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 1000);
+        var camera = new THREE.PerspectiveCamera(70, ratio, 0.1, 1000);
         // Camera is set to these for testing the generation of blocks. 
         // Should be closer to (0, -0.2, 1) in the game
         camera.lookAt(0, -1, 0.1);// and the direction
-        // for real game set it more like (0, 5, -15)
+        // for real game set it more like (0, 1.8, -15)
         camera.position.set(0, 275, -15);//set the camera position
-        var cameralight = new THREE.PointLight( new THREE.Color(1,1,1), 1 );
+        var cameralight = new THREE.PointLight( new THREE.Color(1,1,1), 0.5 );
         camera.add( cameralight );
         scene.add(camera);
+
+        // We can change the colour and intensity of the sunlight through the simulation
+        var sunLightColour = new THREE.Color(0xfffee0);
+        var sunLight = new THREE.DirectionalLight(sunLightColour, 1);
+        var sunLightOffset = new THREE.Vector3(0,100,0);
+        sunLight.position.set(0,100,0);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 1024; // default
+        sunLight.shadow.mapSize.height = 1024; // default
+        sunLight.shadow.camera.near = 0.5; // default
+        sunLight.shadow.camera.far = 200; // default
+        sunLight.shadow.camera.left = 80;
+        sunLight.shadow.camera.right = -80;
+        sunLight.shadow.camera.top = 80;
+        sunLight.shadow.camera.bottom = -80;
+        sunLight.shadow.camera.updateProjectionMatrix();
+        scene.add(sunLight);
+        var sunTarget = new THREE.Object3D();
+        sunTargetAngle = new THREE.Vector3(-3.3, -3, -0.08);// change this to rotate the sun. 
+        sunTarget.position.set(sunLight.position.x + sunTargetAngle.x, sunLight.position.y + sunTargetAngle.y, sunLight.position.z + sunTargetAngle.z);
+        scene.add(sunTarget);
+        sunLight.target = sunTarget;
+
+        //Create a helper for the shadow camera (optional)
+        //const helper = new THREE.CameraHelper( sunLight.shadow.camera );
+        //scene.add( helper );
 
         var boxMat = new THREE.MeshLambertMaterial();
         boxMat.color = new THREE.Color(0.6, 0.3, 0.0, 1.0);
@@ -78,6 +109,9 @@
         var playerLook = new THREE.Vector3(0, 0, 0);
         var velo = new THREE.Vector3(0,0,0); //velocity
         var accel = new THREE.Vector3(0,0,0);//acceleration
+
+        // Generation amounts
+        var cur_urbanness = 50;
 
 
         // // testing linked list
@@ -135,9 +169,11 @@
             return new THREE.Vector3(Math.round(inVec.x / gridSize) * gridSize, Math.round(inVec.y / gridSize) * gridSize, Math.round(inVec.z / gridSize) * gridSize, );
         }
 
+        var updateShadows = false;
         // Gameplay functions
         function UpdatePlayerPosition() {
             var delta = clock.getDelta();
+            updateShadows = false;
             // Make sure acceleration is up to date. 
             // Apply friction, i.e acc += velo * -0.05
             //velo.add(accel.multiplyScalar(delta); // should be correct
@@ -170,6 +206,7 @@
                             newBlock.position = thisPos;
                             newBlock.floor.position = thisPos;
                             blocks.addNodeAtTail(newBlock);
+                            updateShadows = true;
                             //console.log("Adding new block at ("+thisPos.x+','+thisPos.y+')');
                             //console.log("floor.pos: " + newBlock.floor.position + " pos: " + newBlock.position);
                         }
@@ -185,9 +222,9 @@
 
 
         // generating new buildings
-        var bldg_1 = new Building(100 ,new THREE.Vector3(0, 0, 0), new THREE.Color(1,0,0)); // Red, very urban
-        var bldg_2 = new Building(0, new THREE.Vector3(30, 0, 0), new THREE.Color(0,1,0));  // Green, not at all urban
-        var bldg_3 = new Building(30, new THREE.Vector3(60, 0, 0), new THREE.Color(0,0,1)); // Blue, sometimes highrise, usually not
+        //var bldg_1 = new Building(100 ,new THREE.Vector3(0, 0, 0), new THREE.Color(1,0,0)); // Red, very urban
+        //var bldg_2 = new Building(0, new THREE.Vector3(30, 0, 0), new THREE.Color(0,1,0));  // Green, not at all urban
+        //var bldg_3 = new Building(30, new THREE.Vector3(60, 0, 0), new THREE.Color(0,0,1)); // Blue, sometimes highrise, usually not
 
 
         var MyUpdateLoop = function () {
@@ -197,6 +234,15 @@
             //incrementor = (incrementor + 1) % blocks.size;
             box.position.z = playerPos.z;
             UpdatePlayerPosition();
+
+            if (updateShadows){
+                //sunLight.position = playerPos + sunLightOffset;
+                sunLight.position.set(playerPos.x, playerPos.y + sunLightOffset.y, playerPos.z);
+                sunTarget.position.set(sunLight.position.x + sunTargetAngle.x, sunLight.position.y + sunTargetAngle.y, sunLight.position.z + sunTargetAngle.z);
+                //sunTarget.position.set(sunLight.position.x + sunTargetAngle.x + playerPos.x, sunLight.position.y + sunTargetAngle.y + playerPos.y, sunLight.position.z + sunTargetAngle.z + playerPos.z)
+                //sunLight.position.add(sunLightOffset);
+                sunLight.shadow.camera.updateProjectionMatrix();
+            }
 
             renderer.render(scene, camera);
             requestAnimationFrame(MyUpdateLoop);

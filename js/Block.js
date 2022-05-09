@@ -3,6 +3,11 @@
 const gridSize = 20; // arbitrary and untested, feel free to change
 const streetWidth = 5;
 const buildingWidth = gridSize - streetWidth;
+const flatRotation = -Math.PI / 2;
+const randomOffset = 30;
+const highrise_threshold = 70;
+const house_threshold = 20;
+const farmhouse_threshold = 10;
 
 class Block {
     constructor(position, scene) {
@@ -17,12 +22,22 @@ class Block {
         this.floorGeometry = new THREE.PlaneGeometry(gridSize, gridSize, 1, 1);
         this.floor = new THREE.Mesh(this.floorGeometry, this.floorMaterial);
         scene.add(this.floor);
-        var flatRotation = -Math.PI / 2;
+        
         this.floor.rotation.x = flatRotation;
-        this.floor.position.y = position.y;
-        this.floor.position.x = position.x;
-        this.floor.position.z = position.z;
-        //this.floor.position = position;
+        this.floor.position.set(this.position.x, this.position.y - 0.05, this.position.z);
+
+        // Building
+        var randCol = new THREE.Color(Math.random(), Math.random(), Math.random());
+        // Decide on the building with some randomness
+        var randomBuildingSeed = cur_urbanness + THREE.Math.randInt(-randomOffset, randomOffset);
+        if (randomBuildingSeed > highrise_threshold)
+            this.building = new HighriseBuilding(cur_urbanness, this.position, randCol);
+        else if (randomBuildingSeed > house_threshold)
+            this.building = new Building(cur_urbanness, this.position, randCol);
+        else 
+            this.building = new FarmBuilding(cur_urbanness, this.position, randCol);
+        
+        // Roads
         this.roadGeoLong = new THREE.PlaneGeometry(streetWidth,gridSize);
         this.roadGeoShort = new THREE.PlaneGeometry(gridSize - streetWidth, streetWidth);
         this.stripGeo = new THREE.PlaneGeometry((gridSize - streetWidth) / 2, streetWidth / 6);
@@ -38,7 +53,7 @@ class Block {
             var roadMesh;
             var stripMesh;
             stripMesh = new THREE.Mesh(this.stripGeo,this.stripMat);
-            stripMesh.position.set(this.position.x, this.position.y + 0.01, this.position.z);// raise it just above the road to stop z-fighting
+            stripMesh.position.set(this.position.x, this.position.y + 0.04, this.position.z);// raise it just above the road to stop z-fighting
             this.stripPlanes.push(stripMesh);
             if (i<2){ // long roads along z axis
                 roadMesh = new THREE.Mesh(this.roadGeoLong, this.roadMat);
@@ -54,9 +69,11 @@ class Block {
                 stripMesh.position.z += (i%2==0?1:-1) * gridSize / 2;
             }
             roadMesh.rotation.x = flatRotation;
+            roadMesh.receiveShadow = true;
             this.roadPlanes.push(roadMesh);
             for (var j=0; j<this.stripPlanes.length;j++){
                 this.stripPlanes[j].rotation.x = flatRotation;
+                this.stripPlanes[j].receiveShadow = true;
                 scene.add(this.stripPlanes[j]);
             }
             scene.add(roadMesh);
@@ -65,6 +82,7 @@ class Block {
 
     destroy(){
         this.scene.remove(this.floor);
+        this.building.Destroy();
         delete this.floorMaterial;
         delete this.floorGeometry;
         delete this.floor;
@@ -94,6 +112,3 @@ const Blockf = function(position){
     this.floor.position = position;
     this.floor.position.y = -10;
 }
-
-// you can just call gridSize with this file imported  :)
-//const GetGridSize = function(){ return gridSize; }
