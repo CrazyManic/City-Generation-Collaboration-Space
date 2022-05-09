@@ -1,13 +1,15 @@
 // 0 - house, 1 - highrise
-var building_baseheight = [30, 100];
-const building_height_randomness = [1.2, 1.7];
+const building_baseheight = [10, 35];
+const building_height_randomness = [1.2, 1.7]; // as of right now, unused :(
 const blockLength = gridSize - streetWidth;
+const blockLengthOffset = 5; // change this to modifiy how wide the building is (used in regular buildings)
+const randExtraHeight = 5;
 
 class Building{
     constructor(urbanness, create_position, pColor1, pColor2, pColor3)
     {
-        console.log("Create new building at "+create_position.x+" "+create_position.y+" "+create_position.z);
-        
+        //console.log("Create new building at "+create_position.x+" "+create_position.y+" "+create_position.z);
+        this.position = create_position;
         this.height;
         this.buildingType = 0;
         this.bldg_geom;
@@ -18,6 +20,8 @@ class Building{
         
               
         this.buildingMesh = new THREE.Mesh(this.bldg_geom, this.bldg_mat);
+        //this.buildingMesh.receiveShadow = true;
+        this.buildingMesh.castShadow = true;
 
         // set building position to the given coordinates
         this.buildingMesh.position.x = create_position.x;
@@ -29,30 +33,32 @@ class Building{
     }
 
     Generate(urbanness, pColor1, pColor2, pColor3){ // Overwrite this function in descendent classes to implement different building types. 
-        console.log("Urbanness is "+urbanness);
-        // 1: using the urbanness, determine which building to generate
-        // lower to 0 = more chance of a house
-        var threshold_highrise = 100 - urbanness;
-        var buildingtype_rand = Math.random()*100;
-        console.log(buildingtype_rand);
-        // 2: using the urbanness, change the building size
-        // lower to 0 = smaller building
-        if (buildingtype_rand > threshold_highrise)
-        {
-            console.log("Generate highrise");
-            this.buildingType = 1; // highrise
-        }
-        else{ 
-            console.log("Generate house"); 
-            this.buildingType = 0;
-        }
-        
-        this.height = building_baseheight[this.buildingType];// * building_height_randomness[this.buildingType] * Math.random()
-        // would be good to add some random variation
+        // console.log("Urbanness is "+urbanness);
+        // // 1: using the urbanness, determine which building to generate
+        // // lower to 0 = more chance of a house
+        // var threshold_highrise = 100 - urbanness;
+        // var buildingtype_rand = Math.random()*100;
+        // console.log(buildingtype_rand);
+        // // 2: using the urbanness, change the building size
+        // // lower to 0 = smaller building
+        // if (buildingtype_rand > threshold_highrise)
+        // {
+        //     console.log("Generate highrise");
+        //     this.buildingType = 1; // highrise
+        // }
+        // else{ 
+        //     console.log("Generate house"); 
+        //     this.buildingType = 0;
+        // }
+        var singlehouseLength = blockLength - (blockLengthOffset * Math.random());
 
-        this.bldg_geom = new THREE.BoxGeometry(blockLength, this.height, blockLength);    
+        this.height = building_baseheight[0] + randExtraHeight * Math.random() *2; // 2x for more varied building height
+        // * building_height_randomness[this.buildingType] * Math.random()
+        // would be good to add some random variation
+        this.bldg_geom = new THREE.BoxGeometry(singlehouseLength, this.height, singlehouseLength);    
         this.bldg_mat = new THREE.MeshPhongMaterial();  
         this.bldg_mat.color = pColor1;
+        console.log(this.height);
     }
 
     Destroy(){
