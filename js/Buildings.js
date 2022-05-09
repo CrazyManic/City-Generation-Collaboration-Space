@@ -2,7 +2,7 @@
 const building_baseheight = [10, 35];
 const building_height_randomness = [1.2, 1.7]; // as of right now, unused :(
 const blockLength = gridSize - streetWidth;
-const blockLengthOffset = 5; // change this to modifiy how wide the building is (used in regular buildings)
+const blockLengthOffset = 10; // change this to modifiy how wide the building is (used in regular buildings)
 const randExtraHeight = 5;
 
 class Building{

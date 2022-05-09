@@ -330,7 +330,9 @@
             //this is just a placeholder 
             var params = {PlayerPositionZ: playerPos.z,
                 PlayerPositionX: playerPos.x,
-                PlayerPositionY: playerPos.y}
+                PlayerPositionY: playerPos.y,
+                urbanness: cur_urbanness
+            }
 
             gui.add( params, 'PlayerPositionZ', 0, 150 ).onChange( function ( val ) {
                 playerPos.z = val;
@@ -344,8 +346,9 @@
                 playerPos.y = val;
             });
             //playerholder ends here!
-
-            gui.add();(urbanness)
+            gui.add(params, 'urbanness', 0, 100).onChange(function(val){
+                cur_urbanness = val;
+            });
 
             gui.open();
 
