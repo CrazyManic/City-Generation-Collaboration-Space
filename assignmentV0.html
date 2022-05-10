@@ -64,7 +64,7 @@
         // Should be closer to (0, -0.2, 1) in the game
         camera.lookAt(0, -1, 0.1);// and the direction
         // for real game set it more like (0, 1.8, -15)
-        camera.position.set(0, 275, -15);//set the camera position
+        camera.position.set(0, 50, -15);//set the camera position //275
         var cameralight = new THREE.PointLight( new THREE.Color(1,1,1), 0.5 );
         camera.add( cameralight );
         scene.add(camera);
@@ -114,6 +114,10 @@
         // Generation amounts
         var cur_urbanness = 50;
 
+        // testing string manipulation
+        //var testString = "abcdef.ply";
+        //var endString = testString.slice(testString.length - 4);
+        //console.log(endString);
 
         // // testing linked list
         // var list = new LinkedList();

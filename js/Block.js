@@ -31,11 +31,16 @@ class Block {
         // Decide on the building with some randomness
         var randomBuildingSeed = cur_urbanness + THREE.Math.randInt(-randomOffset, randomOffset);
         if (randomBuildingSeed > highrise_threshold)
-            this.building = new HighriseBuilding(cur_urbanness, this.position, randCol);
-        else if (randomBuildingSeed > house_threshold)
-            this.building = new Building(cur_urbanness, this.position, randCol);
-        else 
-            this.building = new FarmBuilding(cur_urbanness, this.position, randCol);
+            this.building = new HighriseBuilding(cur_urbanness, this.position, [randCol]);
+        else{
+            // testing mesh building
+            this.building = new MeshBuilding(cur_urbanness, this.position, [randCol], ["basic house 1 whole.ply"]);
+        }
+        // the real else statements
+        // else if (randomBuildingSeed > house_threshold)
+        //     this.building = new Building(cur_urbanness, this.position, [randCol]);
+        // else 
+        //     this.building = new FarmBuilding(cur_urbanness, this.position, [randCol]);
         
         // Roads
         this.roadGeoLong = new THREE.PlaneGeometry(streetWidth,gridSize);

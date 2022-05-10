@@ -5,7 +5,7 @@ const farmHouseGeo = new THREE.BoxGeometry(gridSize/3, 11,gridSize/3);
 //const flatRotation = -Math.PI / 2;
 
 class FarmBuilding extends Building{
-    Generate(urbanness, pColor1, pColor2, pColor3){
+    Generate(urbanness, paramColours){
         // grass
         this.grassColor = healthyGrassCol.lerp(dryGrassCol, urbanness / 100);
         var grassMat = new THREE.MeshLambertMaterial();
@@ -18,7 +18,7 @@ class FarmBuilding extends Building{
 
         // house
         var farmHouseMat = new THREE.MeshLambertMaterial();
-        farmHouseMat.color = pColor1;
+        farmHouseMat.color = paramColours[0];
         this.farmHouseMesh = new THREE.Mesh(farmHouseGeo, farmHouseMat);
         this.farmHouseMesh.position.set(this.position.x + buildingWidth/3, this.position.y + 11/2, this.position.z + buildingWidth/3);
         this.farmHouseMesh.castShadow = true;
