@@ -20,6 +20,8 @@
     <script src="js/LinkedList.js"></script>
     <script src="js/OrbitControls.js"></script>
     <script src="js/PLYLoader.js"></script>
+    <script src="js/OBJLoader.js"></script>
+    <script src="js/MTLLoader.js"></script>    
     <script src="js/Buildings.js"></script>
     <script src="js/FarmBuilding.js"></script>
     <script src="js/HighriseBuilding.js"></script>
@@ -42,9 +44,11 @@
         }
     </style>
     <div id="info">
-        <p>This is a threeJS Test<br>
+        <p>Procedural City Generation<br>
     </div>
-    <script>
+
+        <script>
+
         var scene = new THREE.Scene();//create the scene
         var renderer = new THREE.WebGLRenderer();//create the webgl renderer
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -58,12 +62,14 @@
         // Background color should be turned off but makes things very visible
         scene.background = new THREE.Color(new THREE.Color(0.3, 0.6, 0.0, 1.0));
         //create the perspective camera
-        var camera = new THREE.PerspectiveCamera(70, ratio, 0.1, 1000);
+        var camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 1000);
         // Camera is set to these for testing the generation of blocks. 
         // Should be closer to (0, -0.2, 1) in the game
-        camera.lookAt(0, -1, 0.1);// and the direction
-        // for real game set it more like (0, 1.8, -15)
-        camera.position.set(0, 275, -15);//set the camera position
+        var cameraDirection = new THREE.Vector3(0, -1, 0.1);
+        camera.lookAt(cameraDirection.x, cameraDirection.y, cameraDirection.z);// and the dires
+        // for real game set it more like (0, 5, -15)
+        var cameraPosition = new THREE.Vector3(0, 150, -25);
+        camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);//set the cas
         var cameralight = new THREE.PointLight( new THREE.Color(1,1,1), 0.5 );
         camera.add( cameralight );
         scene.add(camera);
@@ -99,6 +105,53 @@
         var box = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), boxMat);
         box.position.set(1,0,1);
         scene.add(box);
+
+    //   //Bike model
+     
+    //   var mtlloader = new THREE.MTLLoader();
+    //   mtlloader.setPath('models/') 
+    //   mtlloader.load('11717_bicycle_v2_L1.mtl', function (materials)
+    //   {
+    //     materials.preload();
+    //     var objloader = new THREE.OBJLoader();
+    //     objloader.setMaterials( materials );
+    //     objloader.setPath('models/')
+    //     objloader.load('11717_bicycle_v2_L1.obj', function (bike)
+    //     {
+    //       var boundbox3 = new THREE.Box3();
+    //       boundbox3.setFromObject (bike);
+    //       var CenterBB = new THREE.Vector3();
+    //       var SizeBB = new THREE.Vector3();
+    //       boundbox3.getCenter(CenterBB);
+    //       boundbox3.getSize(SizeBB);
+	// 		    for ( var i = 0, l = bike.children.length; i < l; i ++ ) 
+	// 		    {
+	// 			    bike.children[i].material.color= new THREE.Color(1,1,1);
+	// 	 	    }
+          
+    //       var translation = new THREE.Matrix4();
+    //       var scale = new THREE.Matrix4();
+    //       var combinedScaTra = new THREE.Matrix4();
+          
+    //       bike.rotation.y = 0 * 180/Math.PI;
+    //       bike.rotation.z = 0 * 180/Math.PI;
+    //       bike.rotation.x = 0 * 180/Math.PI;
+
+    //       //adjust scale and translation on what you need 
+    //       scale.makeScale(70/SizeBB.length(), 70/SizeBB.length(), 70/SizeBB.length());
+    //       translation.makeTranslation (-CenterBB.x,-CenterBB.y + 3.325,-CenterBB.z - 5);
+    //       combinedScaTra.multiply(scale);
+    //       combinedScaTra.multiply(translation);
+
+    //       bike.applyMatrix4(combinedScaTra);
+
+    //       bike.shininess = 100;
+    //       bike.castShadow = true;
+
+    //       scene.add(bike);
+    //     });
+
+    //   });
         
         // Set game constants
         var loadRadius = gridSize * 6.5;
@@ -127,6 +180,12 @@
         // list.removeNodeAt(1);
         // console.log(list.getNodeAtIndex(1));
         // // end test linked list
+
+        // movement variables
+        var turnRight = false;
+        var turnLeft = false;
+        var goDirForward = false;
+        var goDirBackward = false;
 
         // Initialise blocks
         let blocks = new LinkedList();
@@ -227,22 +286,78 @@
         //var bldg_3 = new Building(30, new THREE.Vector3(60, 0, 0), new THREE.Color(0,0,1)); // Blue, sometimes highrise, usually not
 
 
+        var turnRight = false;
+        var turnLeft = false;
+        var goDirForward = false;
+        var goDirBackward = false;
+        //blocks.getNodeAtIndex(2).destroy();
+        box.position.z = 50;
+        // Need to figure out which number we need for offset
+        var cameraOffset = -15;
+        var rotationSpeed = 5;
+        //yeah we need to change movespeed to acceleration or something
+        var moveSpeed = 40;
+        var rotationAngle = 0;
+
         var MyUpdateLoop = function () {
             // code
+
+            //turning code (This is just a code to get started when we do rotations)
+            var delta = clock.getDelta();
+
+            if (turnRight == true) 
+            {
+                rotationAngle -= rotationSpeed * delta;
+                playerLook.x = Math.sin(rotationAngle);
+                playerLook.z = Math.cos(rotationAngle);
+                playerLook.normalize();
+            }
+            if (turnLeft == true)
+            {
+                rotationAngle += rotationSpeed * delta;
+                playerLook.x = Math.sin(rotationAngle);
+                playerLook.z = Math.cos(rotationAngle);
+                playerLook.normalize(); 
+            }
+            if (goDirForward == true)
+            {
+                playerPos.x += playerLook.x*moveSpeed*delta;
+                playerPos.z += playerLook.z*moveSpeed*delta;
+                moveSpeed = 40; 
+            } 
+            if (goDirBackward == true)
+            {
+                playerPos.x -= playerLook.x*moveSpeed*delta;
+                playerPos.z -= playerLook.z*moveSpeed*delta;
+                moveSpeed = 10; 
+            }
+
             //box.position.set(blocks.getNodeAtIndex(incrementor).position.x,blocks.getNodeAtIndex(incrementor).position.y,blocks.getNodeAtIndex(incrementor).position.z);
             //console.log(blocks.getNodeAtIndex(incrementor).floor.position);
             //incrementor = (incrementor + 1) % blocks.size;
-            box.position.z = playerPos.z;
-            UpdatePlayerPosition();
 
-            if (updateShadows){
-                //sunLight.position = playerPos + sunLightOffset;
-                sunLight.position.set(playerPos.x, playerPos.y + sunLightOffset.y, playerPos.z);
-                sunTarget.position.set(sunLight.position.x + sunTargetAngle.x, sunLight.position.y + sunTargetAngle.y, sunLight.position.z + sunTargetAngle.z);
-                //sunTarget.position.set(sunLight.position.x + sunTargetAngle.x + playerPos.x, sunLight.position.y + sunTargetAngle.y + playerPos.y, sunLight.position.z + sunTargetAngle.z + playerPos.z)
-                //sunLight.position.add(sunLightOffset);
-                sunLight.shadow.camera.updateProjectionMatrix();
-            }
+            box.position.z = playerPos.z;
+            //console.log(rotationAngle * (180/Math.PI));
+            
+            box.rotation.y = playerLook.z;
+            box.rotation.y = playerLook.x;
+
+
+            box.position.x = playerPos.x;
+
+            cameraPosition.z = playerPos.z - 2.5;
+            
+            cameraPosition.x = playerPos.x;
+
+
+            //setting camera position to the player
+
+            // not sure what to do about the camera angle 
+            // cameraPosition = playerPos - flatOffset * playerLook + vertOffset; 
+            
+            camera.position.set(cameraPosition.x,cameraPosition.y, cameraPosition.z);
+            camera.updateProjectionMatrix();
+            UpdatePlayerPosition();
 
             renderer.render(scene, camera);
             requestAnimationFrame(MyUpdateLoop);
@@ -272,22 +387,23 @@
             switch (event.keyCode) {
                 case 38: // up
                 case 87: // w
-                    playerPos.z += 10; // just to test movement. 
+                    // just to test movement.
+                    goDirForward = true;
                     break;
 
                 case 37: // left
                 case 65: // a
-                    
+                    turnLeft = true;
                     break;
 
                 case 40: // down
                 case 83: // s
-                    
+                    goDirBackward = true;
                     break;
 
                 case 39: // right
                 case 68: // d
-                    
+                    turnRight = true;
                     break;
             }
 
@@ -298,22 +414,22 @@
             switch (event.keyCode) {
                 case 38: // up
                 case 87: // w
-                    
+                    goDirForward = false;
                     break;
 
                 case 37: // left
                 case 65: // a
-                    
+                    turnLeft = false;                    
                     break;
 
                 case 40: // down
                 case 83: // s
-                    
+                    goDirBackward = false; 
                     break;
 
                 case 39: // right
                 case 68: // d
-                    
+                    turnRight = false;                    
                     break;
             }
         };
@@ -334,18 +450,6 @@
                 urbanness: cur_urbanness
             }
 
-            gui.add( params, 'PlayerPositionZ', 0, 150 ).onChange( function ( val ) {
-                playerPos.z = val;
-            });
-
-            gui.add( params, 'PlayerPositionX', 0, 150 ).onChange( function ( val ) {
-                playerPos.x = val;
-            });
-
-            gui.add( params, 'PlayerPositionY', 0, 150 ).onChange( function ( val ) {
-                playerPos.y = val;
-            });
-            //playerholder ends here!
             gui.add(params, 'urbanness', 0, 100).onChange(function(val){
                 cur_urbanness = val;
             });
@@ -355,8 +459,8 @@
         }
 
         buildGui();
-
-
+         
     </script>
 </body>
 </html>
+
