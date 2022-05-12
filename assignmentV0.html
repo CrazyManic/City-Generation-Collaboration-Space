@@ -98,13 +98,34 @@
 
         // Load our meshes
         const modelDirectory = "Models/";
-        var plyLoader = new THREE.PLYLoader();
-        var modelsPLY = ["basic house 1 whole.ply"];
+        //var plyLoader = new THREE.PLYLoader();
+        //var modelsPLY = ["basic house 1 whole.ply"];
+        // OBJ stuff https://github.com/mrdoob/three.js/blob/dev/examples/webgl_loader_obj.html 
+        function loadModel() {
+            object.traverse( function ( child ) {
+                if ( child.isMesh ) child.material.map = texture;
+            } );
+            object.position.y = - 95;
+            scene.add( object );
+        }
+        const manager = new THREE.LoadingManager( loadModel );
+        function onProgress( xhr ) {
+            if ( xhr.lengthComputable ) {
+                const percentComplete = xhr.loaded / xhr.total * 100;
+                console.log( 'model ' + Math.round( percentComplete, 2 ) + '% downloaded' );
+            }
+        }
+        function onError() {}
+        const loader = new OBJLoader( manager );
+
+        var modelsOBJ = ["basic house 1 full.obj"];
         var loadedMeshes = [];
         for (let fileIndex=0; fileIndex < modelsPLY.length; fileIndex++){
             var itMesh;
             //console.log('loading: ' + (modelDirectory+modelsPLY[fileIndex]));
-            plyLoader.load(modelDirectory+modelsPLY[fileIndex], function(impGeometry){
+            //plyLoader.load(modelDirectory+modelsPLY[fileIndex], function(impGeometry){
+            loader.load(modelDirectory+modelsPLY[fileIndex], function ( obj ) {
+                object = obj;
                 var impMaterial = new THREE.MeshLambertMaterial();
                 impMaterial.color = midGrey;
                 impGeometry.computeVertexNormals();
@@ -119,7 +140,7 @@
                 loadedMeshes.push(itMesh);
                 scene.add(itMesh);
                 console.log('loaded a ply file: ' + modelsPLY[fileIndex]);
-            });
+            }, onProgress, onError );
         }
 
         var boxMat = new THREE.MeshLambertMaterial();
