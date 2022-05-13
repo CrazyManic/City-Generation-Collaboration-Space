@@ -65,10 +65,10 @@
         var camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 1000);
         // Camera is set to these for testing the generation of blocks. 
         // Should be closer to (0, -0.2, 1) in the game
-        var cameraDirection = new THREE.Vector3(0, -1, 0.1);
+        var cameraDirection = new THREE.Vector3(0, -0.2, 1);
         camera.lookAt(cameraDirection.x, cameraDirection.y, cameraDirection.z);// and the dires
         // for real game set it more like (0, 5, -15)
-        var cameraPosition = new THREE.Vector3(0, 150, -25);
+        var cameraPosition = new THREE.Vector3(0, 5, -25);
         camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);//set the cas
         var cameralight = new THREE.PointLight( new THREE.Color(1,1,1), 0.5 );
         camera.add( cameralight );
@@ -102,8 +102,8 @@
 
         var boxMat = new THREE.MeshLambertMaterial();
         boxMat.color = new THREE.Color(0.6, 0.3, 0.0, 1.0);
-        var box = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), boxMat);
-        box.position.set(1,0,1);
+        var box = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.5, 2.5), boxMat);
+        box.position.set(0,0,0);
         scene.add(box);
 
     //   //Bike model
@@ -208,7 +208,7 @@
         //console.log(blocks.head.next.value.floor.position);
         //console.log(blocks.head.next.next.value.floor.position);
         //box.position.set(blocks.head.next.next.value.floor.position);
-        box.position.set(0,120,-10);
+        box.position.set(0, 0, 0);
         //camera.lookAt(blocks.head.next.next.value.floor.position);
         // for (rows=intRad; rows >= -intRad; rows--){
         //     //var theta = Math.asin(rows/intRad);
@@ -352,17 +352,12 @@
 
             box.position.x = playerPos.x;
 
-            cameraPosition.z = playerPos.z - 2.5;
+            cameraPosition.z = playerPos.z;
             
             cameraPosition.x = playerPos.x;
-
-
-            //setting camera position to the player
-
-            // not sure what to do about the camera angle 
-            // cameraPosition = playerPos - flatOffset * playerLook + vertOffset; 
             
-            camera.position.set(cameraPosition.x,cameraPosition.y, cameraPosition.z);
+            camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z - 15);
+            camera.lookAt(playerLook.x + cameraPosition.x, cameraDirection.y + cameraPosition.y, playerLook.z + cameraPosition.z);
             camera.updateProjectionMatrix();
             UpdatePlayerPosition();
 
@@ -451,9 +446,7 @@
             gui = new dat.GUI();
             
             //this is just a placeholder 
-            var params = {PlayerPositionZ: playerPos.z,
-                PlayerPositionX: playerPos.x,
-                PlayerPositionY: playerPos.y,
+            var params = {
                 urbanness: cur_urbanness
             }
 
@@ -470,4 +463,3 @@
     </script>
 </body>
 </html>
-
