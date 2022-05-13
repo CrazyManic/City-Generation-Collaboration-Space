@@ -57,7 +57,7 @@ class Building{
         this.bldg_geom = new THREE.BoxGeometry(singlehouseLength, this.height, singlehouseLength);    
         this.bldg_mat = new THREE.MeshPhongMaterial();  
         this.bldg_mat.color = pColor1;
-        console.log(this.height);
+        //console.log(this.height);
     }
 
     Destroy(){

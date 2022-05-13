@@ -159,7 +159,7 @@
 
         // Set game variables
         var playerPos = new THREE.Vector3(0, 0, 0);
-        var playerLook = new THREE.Vector3(0, 0, 0);
+        var playerLook = new THREE.Vector3(0, 0, 1);
         var velo = new THREE.Vector3(0,0,0); //velocity
         var accel = new THREE.Vector3(0,0,0);//acceleration
 
@@ -339,9 +339,16 @@
             box.position.z = playerPos.z;
             //console.log(rotationAngle * (180/Math.PI));
             
-            box.rotation.y = playerLook.z;
-            box.rotation.y = playerLook.x;
-
+            var playerFaceLoc = playerPos.clone().add(playerLook);
+            
+            
+            //box.rotation.y = playerLook.z;
+            //box.rotation.y = playerLook.x;
+            //box.lookAt(playerLook);
+            box.lookAt(playerFaceLoc);
+            //console.log('Player look: ');
+            console.log('Player look: (' + playerLook.x + ', ' + playerLook.y + ', ' + playerLook.z + ')');
+            console.log('box rotation: (' + box.rotation.x + ', ' + box.rotation.y + ', ' + box.rotation.z + ')');
 
             box.position.x = playerPos.x;
 
