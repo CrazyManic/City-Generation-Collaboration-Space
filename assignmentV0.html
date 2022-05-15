@@ -63,7 +63,7 @@
         var fogdensity = 0.02;
         var fogUpdate = function ()
         {
-        scene.fog = new THREE.FogExp2(fogcolor, fogdensity);
+            scene.fog = new THREE.FogExp2(fogcolor, fogdensity);
         }
 
 
@@ -74,7 +74,7 @@
         var camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 1000);
         // Camera is set to these for testing the generation of blocks. 
         // Should be closer to (0, -0.2, 1) in the game
-        var cameraDirection = new THREE.Vector3(0, -0.2, 1);
+        var cameraDirection = new THREE.Vector3(0, -0.3, 1);
         camera.lookAt(cameraDirection.x, cameraDirection.y, cameraDirection.z);// and the dires
         // for real game set it more like (0, 5, -15)
         var cameraPosition = new THREE.Vector3(0, 5, -25);
@@ -117,50 +117,50 @@
 
     //   //Bike model
      
-    //   var mtlloader = new THREE.MTLLoader();
-    //   mtlloader.setPath('models/') 
-    //   mtlloader.load('11717_bicycle_v2_L1.mtl', function (materials)
-    //   {
-    //     materials.preload();
-    //     var objloader = new THREE.OBJLoader();
-    //     objloader.setMaterials( materials );
-    //     objloader.setPath('models/')
-    //     objloader.load('11717_bicycle_v2_L1.obj', function (bike)
-    //     {
-    //       var boundbox3 = new THREE.Box3();
-    //       boundbox3.setFromObject (bike);
-    //       var CenterBB = new THREE.Vector3();
-    //       var SizeBB = new THREE.Vector3();
-    //       boundbox3.getCenter(CenterBB);
-    //       boundbox3.getSize(SizeBB);
-	// 		    for ( var i = 0, l = bike.children.length; i < l; i ++ ) 
-	// 		    {
-	// 			    bike.children[i].material.color= new THREE.Color(1,1,1);
-	// 	 	    }
-          
-    //       var translation = new THREE.Matrix4();
-    //       var scale = new THREE.Matrix4();
-    //       var combinedScaTra = new THREE.Matrix4();
-          
-    //       bike.rotation.y = 0 * 180/Math.PI;
-    //       bike.rotation.z = 0 * 180/Math.PI;
-    //       bike.rotation.x = 0 * 180/Math.PI;
+        var mtlloader = new THREE.MTLLoader();
+        mtlloader.setPath('models/') 
+        mtlloader.load('11717_bicycle_v2_L1.mtl', function (materials)
+        {
+            materials.preload();
+            var objloader = new THREE.OBJLoader();
+            objloader.setMaterials( materials );
+            objloader.setPath('models/')
+            objloader.load('11717_bicycle_v2_L1.obj', function (bike)
+            {
+            var boundbox3 = new THREE.Box3();
+            boundbox3.setFromObject (bike);
+            var CenterBB = new THREE.Vector3();
+            var SizeBB = new THREE.Vector3();
+            boundbox3.getCenter(CenterBB);
+            boundbox3.getSize(SizeBB);
+                    for ( var i = 0, l = bike.children.length; i < l; i ++ ) 
+                    {
+                        bike.children[i].material.color= new THREE.Color(1,1,1);
+                    }
+            
+            var translation = new THREE.Matrix4();
+            var scale = new THREE.Matrix4();
+            var combinedScaTra = new THREE.Matrix4();
+            
+            bike.rotation.y = 0 * 180/Math.PI;
+            bike.rotation.z = 0 * 180/Math.PI;
+            bike.rotation.x = 0 * 180/Math.PI;
 
-    //       //adjust scale and translation on what you need 
-    //       scale.makeScale(70/SizeBB.length(), 70/SizeBB.length(), 70/SizeBB.length());
-    //       translation.makeTranslation (-CenterBB.x,-CenterBB.y + 3.325,-CenterBB.z - 5);
-    //       combinedScaTra.multiply(scale);
-    //       combinedScaTra.multiply(translation);
+            //adjust scale and translation on what you need 
+            scale.makeScale(70/SizeBB.length(), 70/SizeBB.length(), 70/SizeBB.length());
+            translation.makeTranslation (-CenterBB.x,-CenterBB.y + 3.325,-CenterBB.z - 5);
+            combinedScaTra.multiply(scale);
+            combinedScaTra.multiply(translation);
 
-    //       bike.applyMatrix4(combinedScaTra);
+            bike.applyMatrix4(combinedScaTra);
 
-    //       bike.shininess = 100;
-    //       bike.castShadow = true;
+            bike.shininess = 100;
+            bike.castShadow = true;
 
-    //       scene.add(bike);
-    //     });
+            scene.add(bike);
+            });
 
-    //   });
+        });
         
         // Set game constants
         var loadRadius = gridSize * 6.5;
@@ -356,17 +356,20 @@
             //box.lookAt(playerLook);
             box.lookAt(playerFaceLoc);
             //console.log('Player look: ');
-            console.log('Player look: (' + playerLook.x + ', ' + playerLook.y + ', ' + playerLook.z + ')');
-            console.log('box rotation: (' + box.rotation.x + ', ' + box.rotation.y + ', ' + box.rotation.z + ')');
+            //console.log('Player look: (' + playerLook.x + ', ' + playerLook.y + ', ' + playerLook.z + ')');
+            //console.log('box rotation: (' + box.rotation.x + ', ' + box.rotation.y + ', ' + box.rotation.z + ')');
 
             box.position.x = playerPos.x;
 
-            cameraPosition.z = playerPos.z;
+            cameraPosition = playerPos.clone().add(playerLook.clone().multiplyScalar(-15));
+            //cameraPosition.z = playerPos.z;
+            cameraPosition.y = 5;
+            //cameraPosition.x = playerPos.x;
             
-            cameraPosition.x = playerPos.x;
+            camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+            //camera.lookAt(playerLook.x + cameraPosition.x, cameraPosition.y, playerLook.z + cameraPosition.z);
+            camera.lookAt(playerPos.x, playerPos.y, playerPos.z);
             
-            camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z - 15);
-            camera.lookAt(playerLook.x + cameraPosition.x, cameraPosition.y, playerLook.z + cameraPosition.z);
             camera.updateProjectionMatrix();
             UpdatePlayerPosition();
 
