@@ -348,7 +348,8 @@
             box.position.z = playerPos.z;
             //console.log(rotationAngle * (180/Math.PI));
             
-            var playerFaceLoc = playerPos.clone().add(playerLook);
+            var vertOffset = new THREE.Vector3(0,playerPos.y, 0);
+            var playerFaceLoc = playerPos.clone().add(playerLook).add(vertOffset);
             
             
             //box.rotation.y = playerLook.z;
@@ -362,9 +363,7 @@
             box.position.x = playerPos.x;
 
             cameraPosition = playerPos.clone().add(playerLook.clone().multiplyScalar(-15));
-            //cameraPosition.z = playerPos.z;
             cameraPosition.y = 5;
-            //cameraPosition.x = playerPos.x;
             
             camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
             //camera.lookAt(playerLook.x + cameraPosition.x, cameraPosition.y, playerLook.z + cameraPosition.z);
