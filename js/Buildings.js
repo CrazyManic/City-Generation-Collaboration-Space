@@ -4,9 +4,13 @@ const building_height_randomness = [1.2, 1.7]; // as of right now, unused :(
 const blockLength = gridSize - streetWidth;
 const blockLengthOffset = 10; // change this to modifiy how wide the building is (used in regular buildings)
 const randExtraHeight = 5;
+const groundGeo = new THREE.PlaneGeometry(blockLength, blockLength);
+const groundMat = new THREE.MeshLambertMaterial();
+const groundColour = new THREE.Color(0.7,0.7,0.78);
+groundMat.color = groundColour;
 
 class Building{
-    constructor(urbanness, create_position, pColor1, pColor2, pColor3)
+    constructor(urbanness, create_position, paramColours, mesh_files)
     {
         //console.log("Create new building at "+create_position.x+" "+create_position.y+" "+create_position.z);
         this.position = create_position;
@@ -16,7 +20,7 @@ class Building{
         this.bldg_mat;
         // In OOP we put this in a different function, so that it can have a custom definition
         // for descendant classes, but all other functionality is common to all. 
-        this.Generate(urbanness, pColor1, pColor2, pColor3);
+        this.Generate(urbanness, paramColours, mesh_files);
         
               
         this.buildingMesh = new THREE.Mesh(this.bldg_geom, this.bldg_mat);
@@ -30,9 +34,16 @@ class Building{
 
         // add building mesh to the scene
         scene.add(this.buildingMesh);
+
+        this.groundMesh = new THREE.Mesh(groundGeo, groundMat);
+        this.groundMesh.receiveShadow = true;
+        this.groundMesh.rotation.x = -Math.PI / 2;
+        this.groundMesh.position.set(create_position.x, create_position.y, create_position.z);
+        scene.add(this.groundMesh);
     }
 
-    Generate(urbanness, pColor1, pColor2, pColor3){ // Overwrite this function in descendent classes to implement different building types. 
+    //pColor1, pColor2, pColor3
+    Generate(urbanness, paramColours, mesh_files){ // Overwrite this function in descendent classes to implement different building types. 
         // console.log("Urbanness is "+urbanness);
         // // 1: using the urbanness, determine which building to generate
         // // lower to 0 = more chance of a house
@@ -56,13 +67,15 @@ class Building{
         // would be good to add some random variation
         this.bldg_geom = new THREE.BoxGeometry(singlehouseLength, this.height, singlehouseLength);    
         this.bldg_mat = new THREE.MeshPhongMaterial();  
-        this.bldg_mat.color = pColor1;
-        //console.log(this.height);
+        this.bldg_mat.color = paramColours[0];
+        console.log(this.height);
     }
 
     Destroy(){
         scene.remove(this.buildingMesh);
         this.DestroyExtras();
+        scene.remove(this.groundMesh);
+        delete this.groundMesh;
         delete this.buildingMesh;
         delete this.height;
         delete this.buildingType;
