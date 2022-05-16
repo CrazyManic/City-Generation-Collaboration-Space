@@ -327,7 +327,7 @@
         var cameraOffset = -15;
         var rotationSpeed = 2;
         //yeah we need to change movespeed to acceleration or something
-        var moveSpeed = 8;
+        var moveSpeed = 20;
         var reverseSpeed = 5;
         var rotationAngle = 0;
         var bikeRotation = 0;
@@ -383,7 +383,7 @@
             }
 
             cameraPosition = playerPos.clone().add(playerLook.clone().multiplyScalar(-viewBehindOffset));
-            cameraPosition.y = 5;
+            cameraPosition.y = 4.65;
             
             camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
             //camera.lookAt(playerLook.x + cameraPosition.x, cameraPosition.y, playerLook.z + cameraPosition.z);
@@ -425,7 +425,6 @@
             switch (event.keyCode) {
                 case 38: // up
                 case 87: // w
-                    // just to test movement.
                     goDirForward = true;
                     break;
 
