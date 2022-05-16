@@ -4,6 +4,10 @@ const building_height_randomness = [1.2, 1.7]; // as of right now, unused :(
 const blockLength = gridSize - streetWidth;
 const blockLengthOffset = 10; // change this to modifiy how wide the building is (used in regular buildings)
 const randExtraHeight = 5;
+const groundGeo = new THREE.PlaneGeometry(blockLength, blockLength);
+const groundMat = new THREE.MeshLambertMaterial();
+const groundColour = new THREE.Color(0.7,0.7,0.78);
+groundMat.color = groundColour;
 
 class Building{
     constructor(urbanness, create_position, pColor1, pColor2, pColor3)
@@ -22,6 +26,7 @@ class Building{
         this.buildingMesh = new THREE.Mesh(this.bldg_geom, this.bldg_mat);
         //this.buildingMesh.receiveShadow = true;
         this.buildingMesh.castShadow = true;
+        this.buildingMesh.receiveShadow = true;
 
         // set building position to the given coordinates
         this.buildingMesh.position.x = create_position.x;
@@ -30,6 +35,12 @@ class Building{
 
         // add building mesh to the scene
         scene.add(this.buildingMesh);
+
+        this.groundMesh = new THREE.Mesh(groundGeo, groundMat);
+        this.groundMesh.receiveShadow = true;
+        this.groundMesh.rotation.x = -Math.PI / 2;
+        this.groundMesh.position.set(create_position.x, create_position.y, create_position.z);
+        scene.add(this.groundMesh);
     }
 
     Generate(urbanness, pColor1, pColor2, pColor3){ // Overwrite this function in descendent classes to implement different building types. 
@@ -62,6 +73,8 @@ class Building{
 
     Destroy(){
         scene.remove(this.buildingMesh);
+        scene.remove(this.groundMesh);
+        delete this.groundMesh;
         this.DestroyExtras();
         delete this.buildingMesh;
         delete this.height;

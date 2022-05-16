@@ -382,6 +382,15 @@
                 playerBike.applyMatrix4(combined);
             }
 
+            if (updateShadows){
+                //sunLight.position = playerPos + sunLightOffset;
+                sunLight.position.set(playerPos.x, playerPos.y + sunLightOffset.y, playerPos.z);
+                sunTarget.position.set(sunLight.position.x + sunTargetAngle.x, sunLight.position.y + sunTargetAngle.y, sunLight.position.z + sunTargetAngle.z);
+                //sunTarget.position.set(sunLight.position.x + sunTargetAngle.x + playerPos.x, sunLight.position.y + sunTargetAngle.y + playerPos.y, sunLight.position.z + sunTargetAngle.z + playerPos.z)
+                //sunLight.position.add(sunLightOffset);
+                sunLight.shadow.camera.updateProjectionMatrix();
+            }
+
             cameraPosition = playerPos.clone().add(playerLook.clone().multiplyScalar(-viewBehindOffset));
             cameraPosition.y = 4.65;
             
