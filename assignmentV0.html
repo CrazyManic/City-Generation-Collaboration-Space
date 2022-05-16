@@ -325,10 +325,13 @@
         box.position.z = 50;
         // Need to figure out which number we need for offset
         var cameraOffset = -15;
-        var rotationSpeed = 5;
+        var rotationSpeed = 2;
         //yeah we need to change movespeed to acceleration or something
-        var moveSpeed = 40;
+        var moveSpeed = 8;
+        var reverseSpeed = 5;
         var rotationAngle = 0;
+        var bikeRotation = 0;
+        var bikeTurnRate = 0.2;
 
         var MyUpdateLoop = function () {
             // code
@@ -354,42 +357,29 @@
             {
                 playerPos.x += playerLook.x*moveSpeed*delta;
                 playerPos.z += playerLook.z*moveSpeed*delta;
-                moveSpeed = 40; 
             } 
             if (goDirBackward == true)
             {
-                playerPos.x -= playerLook.x*moveSpeed*delta;
-                playerPos.z -= playerLook.z*moveSpeed*delta;
-                moveSpeed = 10; 
+                playerPos.x -= playerLook.x*reverseSpeed*delta;
+                playerPos.z -= playerLook.z*reverseSpeed*delta;
             }
-
-            //box.position.set(blocks.getNodeAtIndex(incrementor).position.x,blocks.getNodeAtIndex(incrementor).position.y,blocks.getNodeAtIndex(incrementor).position.z);
-            //console.log(blocks.getNodeAtIndex(incrementor).floor.position);
-            //incrementor = (incrementor + 1) % blocks.size;
-
-            //box.position.z = playerPos.z;
-            //box.position.x = playerPos.x;
-            //console.log(rotationAngle * (180/Math.PI));
+            if (goDirForward || goDirBackward)
+                bikeRotation = lerp(rotationAngle, bikeRotation, bikeTurnRate);
             
             var vertOffset = new THREE.Vector3(0,playerPos.y, 0);
             var playerFaceLoc = playerPos.clone().add(playerLook).add(vertOffset);
             
-            
-            //box.rotation.y = playerLook.z;
-            //box.rotation.y = playerLook.x;
-            //box.lookAt(playerLook);
-            box.lookAt(playerFaceLoc);
-            //console.log('Player look: ');
-            //console.log('Player look: (' + playerLook.x + ', ' + playerLook.y + ', ' + playerLook.z + ')');
-            //console.log('box rotation: (' + box.rotation.x + ', ' + box.rotation.y + ', ' + box.rotation.z + ')');
-
-            
-
-            if (bikeReady){
-                playerBike.position.set(playerPos.x, playerPos.y, playerPos.z);
-                playerBike.lookAt(playerFaceLoc);
-                //playerBike.applyMatrix4(bikeRotationMatrix);
-                //playerBike.lookAt(playerFaceLoc);
+            if (bikeReady){ // if the bike mesh has loaded
+                // all matrices version
+                playerBike.position.set(0,0,0);
+                playerBike.rotation.set(0,0,0);
+                var secondaryRot = new THREE.Matrix4().makeRotationY(bikeRotation);
+                var translation = new THREE.Matrix4().makeTranslation(playerPos.x, playerPos.y, playerPos.z);
+                var combined = new THREE.Matrix4();
+                combined.multiply(translation);
+                combined.multiply(secondaryRot);
+                combined.multiply(bikeRotationMatrix);
+                playerBike.applyMatrix4(combined);
             }
 
             cameraPosition = playerPos.clone().add(playerLook.clone().multiplyScalar(-viewBehindOffset));
@@ -502,6 +492,10 @@
 
             gui.open();
 
+        }
+
+        function lerp(a,b,t){
+            return a*t+b*(1-t);
         }
 
         buildGui();
