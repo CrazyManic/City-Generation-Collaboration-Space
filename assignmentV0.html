@@ -69,7 +69,8 @@
 
 
         // Background color should be turned off but makes things very visible
-        scene.background = new THREE.Color(new THREE.Color(0.3, 0.6, 0.0, 1.0));
+        //scene.background = new THREE.Color(new THREE.Color(0.3, 0.6, 0.0, 1.0));
+        scene.background = new THREE.Color(new THREE.Color('0xDBF3Fa'));
         //create the perspective camera
         var camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 1000);
         // Camera is set to these for testing the generation of blocks. 
@@ -114,10 +115,9 @@
         boxMat.color = new THREE.Color(0.6, 0.3, 0.0, 1.0);
         var box = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.5, 2.5), boxMat);
         box.position.set(0,0,0);
-        scene.add(box);
+        //scene.add(box);
 
     //   //Bike model
-     
         var bikeScale = 2;
         var baseBikeRotation = new THREE.Vector3(-90 * Math.PI/180,0,-90 * Math.PI/180);
         var bikeRotationMatrix = new THREE.Matrix4();
@@ -332,6 +332,7 @@
         var rotationAngle = 0;
         var bikeRotation = 0;
         var bikeTurnRate = 0.2;
+        var viewForwardOffset = 8;
 
         var MyUpdateLoop = function () {
             // code
@@ -396,7 +397,9 @@
             
             camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
             //camera.lookAt(playerLook.x + cameraPosition.x, cameraPosition.y, playerLook.z + cameraPosition.z);
-            camera.lookAt(playerPos.x, playerPos.y, playerPos.z);
+            var cameraTarget = playerPos.clone().add(playerLook.clone().multiplyScalar(viewForwardOffset));
+            camera.lookAt(cameraTarget.x, cameraTarget.y, cameraTarget.z);
+            //camera.lookAt(playerPos.x, playerPos.y, playerPos.z);
             
             camera.updateProjectionMatrix();
             UpdatePlayerPosition();
