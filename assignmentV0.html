@@ -91,14 +91,15 @@
         var sunLightOffset = new THREE.Vector3(0,100,0);
         sunLight.position.set(0,100,0);
         sunLight.castShadow = true;
-        sunLight.shadow.mapSize.width = 1024; // default
-        sunLight.shadow.mapSize.height = 1024; // default
+        sunLight.shadow.mapSize.width = 2048; // default
+        sunLight.shadow.mapSize.height = 2048; // default
         sunLight.shadow.camera.near = 0.5; // default
         sunLight.shadow.camera.far = 200; // default
-        sunLight.shadow.camera.left = 80;
-        sunLight.shadow.camera.right = -80;
-        sunLight.shadow.camera.top = 80;
-        sunLight.shadow.camera.bottom = -80;
+        sunLight.shadow.camera.left = 120;
+        sunLight.shadow.camera.right = -120;
+        sunLight.shadow.camera.top = 120;
+        sunLight.shadow.camera.bottom = -120;
+        sunLight.shadow.bias = 0.005;
         sunLight.shadow.camera.updateProjectionMatrix();
         scene.add(sunLight);
         var sunTarget = new THREE.Object3D();
