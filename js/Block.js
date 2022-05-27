@@ -5,6 +5,7 @@ const streetWidth = 5;
 const buildingWidth = gridSize - streetWidth;
 const flatRotation = -Math.PI / 2;
 const randomOffset = 30;
+const highrise_min_threshold = 50;
 const highrise_threshold = 70;
 const house_threshold = 20;
 const farmhouse_threshold = 10;
@@ -30,7 +31,7 @@ class Block {
         var randCol = new THREE.Color(Math.random(), Math.random(), Math.random());
         // Decide on the building with some randomness
         var randomBuildingSeed = cur_urbanness + THREE.Math.randInt(-randomOffset, randomOffset);
-        if (randomBuildingSeed > highrise_threshold)
+        if (randomBuildingSeed > highrise_threshold && randomBuildingSeed < highrise_min_threshold)
             this.building = new HighriseBuilding(cur_urbanness, this.position, randCol);
         else if (randomBuildingSeed > house_threshold)
             this.building = new Building(cur_urbanness, this.position, randCol);

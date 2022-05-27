@@ -1,5 +1,5 @@
 // 0 - house, 1 - highrise
-const building_baseheight = [5, 35];
+const building_baseheight = [3, 35];
 const building_height_randomness = [1.2, 1.7]; // as of right now, unused :(
 const blockLength = gridSize - streetWidth;
 const blockLengthOffset = 10; // change this to modifiy how wide the building is (used in regular buildings)
