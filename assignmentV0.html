@@ -1,0 +1,522 @@
+<html>
+<head>
+    <title>GroupAssessment</title>
+</head>
+<style>
+
+    body {
+        margin: 0;
+    }
+
+    canvas {
+        width: 100%;
+        height: 100%;
+    }
+</style>
+<body>
+    <!--include the three.js library-->
+    <script src="js/three.js"></script>
+    <script src="js/Block.js"></script>
+    <script src="js/LinkedList.js"></script>
+    <script src="js/OrbitControls.js"></script>
+    <script src="js/PLYLoader.js"></script>
+    <script src="js/OBJLoader.js"></script>
+    <script src="js/MTLLoader.js"></script>    
+    <script src="js/Buildings.js"></script>
+    <script src="js/FarmBuilding.js"></script>
+    <script src="js/HighriseBuilding.js"></script>
+    <script src="js/dat.gui.min.js"></script>
+    <style>
+
+        body {
+            font-family: Monospace;
+            background-color: #000;
+            color: #fff;
+            margin: 0px;
+            overflow: hidden;
+        }
+
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+    <div id="info">
+        <p>Procedural City Generation<br>
+    </div>
+
+        <script>
+
+        var scene = new THREE.Scene();//create the scene
+
+        var renderer = new THREE.WebGLRenderer();//create the webgl renderer
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        //add the renderer to the current document
+        document.body.appendChild(renderer.domElement);
+        var ratio = window.innerWidth / window.innerHeight;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        var fogcolor = 0xFFFFFF;
+        var fogdensity = 0.02;
+        var fogUpdate = function ()
+        {
+            scene.fog = new THREE.FogExp2(fogcolor, fogdensity);
+        }
+
+
+
+        // Background color should be turned off but makes things very visible
+        //scene.background = new THREE.Color(new THREE.Color(0.3, 0.6, 0.0, 1.0));
+        scene.background = new THREE.Color(new THREE.Color('0xDBF3Fa'));
+        //create the perspective camera
+        var camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 1000);
+        // Camera is set to these for testing the generation of blocks. 
+        // Should be closer to (0, -0.2, 1) in the game
+        var cameraDirection = new THREE.Vector3(0, -0.3, 1);
+        camera.lookAt(cameraDirection.x, cameraDirection.y, cameraDirection.z);// and the dires
+        // for real game set it more like (0, 5, -15)
+        var cameraPosition = new THREE.Vector3(0, 5, -25);
+        camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);//set the cas
+        var cameralight = new THREE.PointLight( new THREE.Color(1,1,1), 0.5 );
+        var viewBehindOffset = 10;
+        camera.add( cameralight );
+        scene.add(camera);
+
+        // We can change the colour and intensity of the sunlight through the simulation
+        var sunLightColour = new THREE.Color(0xfffee0);
+        var sunLight = new THREE.DirectionalLight(sunLightColour, 1);
+        var sunLightOffset = new THREE.Vector3(0,100,0);
+        sunLight.position.set(0,100,0);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 1024; // default
+        sunLight.shadow.mapSize.height = 1024; // default
+        sunLight.shadow.camera.near = 0.5; // default
+        sunLight.shadow.camera.far = 200; // default
+        sunLight.shadow.camera.left = 80;
+        sunLight.shadow.camera.right = -80;
+        sunLight.shadow.camera.top = 80;
+        sunLight.shadow.camera.bottom = -80;
+        sunLight.shadow.camera.updateProjectionMatrix();
+        scene.add(sunLight);
+        var sunTarget = new THREE.Object3D();
+        sunTargetAngle = new THREE.Vector3(-3.3, -3, -0.08);// change this to rotate the sun. 
+        sunTarget.position.set(sunLight.position.x + sunTargetAngle.x, sunLight.position.y + sunTargetAngle.y, sunLight.position.z + sunTargetAngle.z);
+        scene.add(sunTarget);
+        sunLight.target = sunTarget;
+
+        //Create a helper for the shadow camera (optional)
+        //const helper = new THREE.CameraHelper( sunLight.shadow.camera );
+        //scene.add( helper );
+
+        var boxMat = new THREE.MeshLambertMaterial();
+        boxMat.color = new THREE.Color(0.6, 0.3, 0.0, 1.0);
+        var box = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.5, 2.5), boxMat);
+        box.position.set(0,0,0);
+        //scene.add(box);
+
+    //   //Bike model
+        var bikeScale = 2;
+        var baseBikeRotation = new THREE.Vector3(-90 * Math.PI/180,0,-90 * Math.PI/180);
+        var bikeRotationMatrix = new THREE.Matrix4();
+        //bikeRotationMatrix.makeRotationX(-90 * Math.PI/180);
+        //bikeRotationMatrix.makeRotationZ(-90 * Math.PI/180)
+        bikeRotationMatrix.multiply(new THREE.Matrix4().makeRotationX(-90 * Math.PI/180)
+            .multiply(new THREE.Matrix4().makeRotationZ(-90 * Math.PI/180)) );
+        var playerBike; 
+        var bikeReady = false;
+        function loadBike(mesh){ 
+            playerBike = mesh.clone(); 
+            console.log('loading bike into variable'); 
+            bikeReady = true;
+            scene.add(playerBike);
+        }
+        var mtlloader = new THREE.MTLLoader();
+        mtlloader.setPath('models/') 
+        mtlloader.load('11717_bicycle_v2_L1.mtl', function (materials)
+        {
+            materials.preload();
+            var objloader = new THREE.OBJLoader();
+            objloader.setMaterials( materials );
+            objloader.setPath('models/')
+            objloader.load('11717_bicycle_v2_L1.obj', function (bike)
+            {
+                //playerBike = bike.clone();
+                //bike = bike.clone();
+                var boundbox3 = new THREE.Box3();
+                boundbox3.setFromObject (bike);
+                var CenterBB = new THREE.Vector3();
+                var SizeBB = new THREE.Vector3();
+                boundbox3.getCenter(CenterBB);
+                boundbox3.getSize(SizeBB);
+                for ( var i = 0, l = bike.children.length; i < l; i ++ ) 
+                {
+                    bike.children[i].material.color= new THREE.Color(1,1,1);
+                }
+            
+                var translation = new THREE.Matrix4();
+                var scale = new THREE.Matrix4();
+                var combinedScaTra = new THREE.Matrix4();
+                
+                bike.rotation.set(baseBikeRotation.x,baseBikeRotation.y,baseBikeRotation.z);
+
+                //adjust scale and translation on what you need 
+                scale.makeScale(bikeScale/SizeBB.length(), bikeScale/SizeBB.length(), bikeScale/SizeBB.length());
+                translation.makeTranslation (-CenterBB.x,-CenterBB.y + bikeScale/2,-CenterBB.z);
+                combinedScaTra.multiply(scale);
+                combinedScaTra.multiply(translation);
+
+                bike.applyMatrix4(combinedScaTra);
+
+                bike.shininess = 70;
+                bike.castShadow = true;
+                bike.receiveShadow = true;
+                bike.name = 'bike :)';
+
+                loadBike(bike);
+                //playerBike.push(bike);
+                //console.log(playerBike[0].name);
+                //playerBike = bike.clone();
+                //scene.add(bike);
+            });
+
+        });
+        
+        // Set game constants
+        var loadRadius = gridSize * 6.5;
+        console.log('Blocks grid size: ' + gridSize); 
+
+        // Set game variables
+        var playerPos = new THREE.Vector3(0, 0, 0);
+        var playerLook = new THREE.Vector3(0, 0, 1);
+        var velo = new THREE.Vector3(0,0,0); //velocity
+        var accel = new THREE.Vector3(0,0,0);//acceleration
+
+        // Generation amounts
+        var cur_urbanness = 50;
+
+
+        // // testing linked list
+        // var list = new LinkedList();
+        // list.addNodeAtHead('start');
+        // console.log(list.size);
+        // console.log(list.getNodeAtIndex(0));
+        // list.addNodeAtTail('middle');
+        // list.addNodeAtTail('end');
+        // console.log(list.head);
+        // console.log(list.getNodeAtIndex(5));
+        // console.log(list.head.next.value);
+        // list.removeNodeAt(1);
+        // console.log(list.getNodeAtIndex(1));
+        // // end test linked list
+
+        // movement variables
+        var turnRight = false;
+        var turnLeft = false;
+        var goDirForward = false;
+        var goDirBackward = false;
+
+        // Initialise blocks
+        let blocks = new LinkedList();
+        let intRad = (loadRadius / gridSize);
+        for (y = intRad; y >= -intRad; y--){
+            for (x = intRad; x >= -intRad; x--){
+                if ((x*x + y*y) <= intRad * intRad){
+                    //console.log('(' + x + ',' + y+'): ('+ (x*gridSize) + ',' + (y*gridSize)+')');
+                    var newBlock = new Block(new THREE.Vector3(x * gridSize, 0.0, y*gridSize), scene);
+                    newBlock.position = new THREE.Vector3(x * gridSize, 0.0, y*gridSize);
+                    newBlock.floor.position = new THREE.Vector3(x * gridSize, 0.0, y*gridSize);
+                    blocks.addNodeAtTail(newBlock);
+                    //console.log("floor.pos: " + newBlock.floor.position + " pos: " + newBlock.position);
+                }
+                //else
+                //    console.log('NOT (' + x + ',' + y+')');
+            }
+        }
+        //console.log(blocks.head.value.floor.position);
+        //console.log(blocks.head.next.value.floor.position);
+        //console.log(blocks.head.next.next.value.floor.position);
+        //box.position.set(blocks.head.next.next.value.floor.position);
+        box.position.set(0, 0, 0);
+        //camera.lookAt(blocks.head.next.next.value.floor.position);
+        // for (rows=intRad; rows >= -intRad; rows--){
+        //     //var theta = Math.asin(rows/intRad);
+        //     var theta = Math.ceil(Math.acos(rows / intRad));
+        //     var genWidth = Math.ceil(intRad/2 * Math.acos(theta));
+        //     console.log("New row: " + rows + ", with width: " + genWidth + "\tTheta: " + theta + "\tacos: " + Math.acos(theta));
+        //     for (cols = genWidth; cols >= -genWidth; cols--){
+        //         //console.log("Adding block at: (" + cols + ", " + rows + ")");
+        //         //blocks.addNodeAtTail(new Block(new THREE.Vector3(rows * gridSize, cols*gridSize, 0.0)));
+        //     }
+        // }
+
+        const clock = new THREE.Clock();
+        //var delta = clock.getDelta(); // use this as necessary, just not in this scope.
+
+        function ConvertToGrid(inVec) {
+            return new THREE.Vector3(Math.round(inVec.x / gridSize) * gridSize, Math.round(inVec.y / gridSize) * gridSize, Math.round(inVec.z / gridSize) * gridSize, );
+        }
+
+        var updateShadows = false;
+        // Gameplay functions
+        function UpdatePlayerPosition() {
+            var delta = clock.getDelta();
+            updateShadows = false;
+            // Make sure acceleration is up to date. 
+            // Apply friction, i.e acc += velo * -0.05
+            //velo.add(accel.multiplyScalar(delta); // should be correct
+            //playerPos.add(velo.multiplyScalar(delta));
+
+            // Delete blocks that are too far 
+            for (i = 0; i < blocks.size; i++) {
+                //console.log("Iterating pos x: " + blocks.getNodeAtIndex(i).position.x);
+                if (blocks.getNodeAtIndex(i).position.distanceTo(ConvertToGrid(playerPos)) >= loadRadius) { // Destroy this block
+                    blocks.getNodeAtIndex(i).destroy();
+                    blocks.removeNodeAt(i);
+                    i--;
+                }
+            }
+            // Generate new blocks
+            for (y = intRad; y >= -intRad; y--){
+                for (x = intRad; x >= -intRad; x--){
+                    if ((x*x + y*y) <= intRad * intRad){
+                        var posUsed = false;
+                        var thisPos = new THREE.Vector3(x * gridSize, 0.0, y*gridSize).add(ConvertToGrid(playerPos));
+                        for (i=0; i < blocks.size; i++){
+                            if (blocks.getNodeAtIndex(i).position.equals(thisPos)){
+                                posUsed = true;
+                                //console.log("Block already occupied: ("+thisPos.x+','+thisPos.y+')');
+                            }
+                        }
+                        if (!posUsed){
+                            //console.log('(' + x + ',' + y+'): ('+ (x*gridSize) + ',' + (y*gridSize)+')');
+                            var newBlock = new Block(thisPos, scene);
+                            newBlock.position = thisPos;
+                            newBlock.floor.position = thisPos;
+                            blocks.addNodeAtTail(newBlock);
+                            updateShadows = true;
+                            //console.log("Adding new block at ("+thisPos.x+','+thisPos.y+')');
+                            //console.log("floor.pos: " + newBlock.floor.position + " pos: " + newBlock.position);
+                        }
+                    }
+                    //else
+                    //    console.log('NOT (' + x + ',' + y+')');
+                }
+            }
+            //console.log(blocks.size);
+        }
+        //blocks.getNodeAtIndex(2).destroy();
+        box.position.z = 50;
+
+
+        // generating new buildings
+        //var bldg_1 = new Building(100 ,new THREE.Vector3(0, 0, 0), new THREE.Color(1,0,0)); // Red, very urban
+        //var bldg_2 = new Building(0, new THREE.Vector3(30, 0, 0), new THREE.Color(0,1,0));  // Green, not at all urban
+        //var bldg_3 = new Building(30, new THREE.Vector3(60, 0, 0), new THREE.Color(0,0,1)); // Blue, sometimes highrise, usually not
+
+
+        var turnRight = false;
+        var turnLeft = false;
+        var goDirForward = false;
+        var goDirBackward = false;
+        //blocks.getNodeAtIndex(2).destroy();
+        box.position.z = 50;
+        // Need to figure out which number we need for offset
+        var cameraOffset = -15;
+        var rotationSpeed = 2;
+        //yeah we need to change movespeed to acceleration or something
+        var moveSpeed = 20;
+        var reverseSpeed = 5;
+        var rotationAngle = 0;
+        var bikeRotation = 0;
+        var bikeTurnRate = 0.2;
+        var viewForwardOffset = 8;
+
+        renderer.setAnimationLoop( function () {
+            // code
+
+            //turning code (This is just a code to get started when we do rotations)
+            var delta = clock.getDelta();
+
+            if (turnRight == true) 
+            {
+                rotationAngle -= rotationSpeed * delta;
+                playerLook.x = Math.sin(rotationAngle);
+                playerLook.z = Math.cos(rotationAngle);
+                playerLook.normalize();
+            }
+            if (turnLeft == true)
+            {
+                rotationAngle += rotationSpeed * delta;
+                playerLook.x = Math.sin(rotationAngle);
+                playerLook.z = Math.cos(rotationAngle);
+                playerLook.normalize(); 
+            }
+            if (goDirForward == true)
+            {
+                playerPos.x += playerLook.x*moveSpeed*delta;
+                playerPos.z += playerLook.z*moveSpeed*delta;
+            } 
+            if (goDirBackward == true)
+            {
+                playerPos.x -= playerLook.x*reverseSpeed*delta;
+                playerPos.z -= playerLook.z*reverseSpeed*delta;
+            }
+            if (goDirForward || goDirBackward)
+                bikeRotation = lerp(rotationAngle, bikeRotation, bikeTurnRate);
+            
+            var vertOffset = new THREE.Vector3(0,playerPos.y, 0);
+            var playerFaceLoc = playerPos.clone().add(playerLook).add(vertOffset);
+            
+            if (bikeReady){ // if the bike mesh has loaded
+                // all matrices version
+                playerBike.position.set(0,0,0);
+                playerBike.rotation.set(0,0,0);
+                var secondaryRot = new THREE.Matrix4().makeRotationY(bikeRotation);
+                var translation = new THREE.Matrix4().makeTranslation(playerPos.x, playerPos.y, playerPos.z);
+                var combined = new THREE.Matrix4();
+                combined.multiply(translation);
+                combined.multiply(secondaryRot);
+                combined.multiply(bikeRotationMatrix);
+                playerBike.applyMatrix4(combined);
+            }
+
+            if (updateShadows){
+                //sunLight.position = playerPos + sunLightOffset;
+                sunLight.position.set(playerPos.x, playerPos.y + sunLightOffset.y, playerPos.z);
+                sunTarget.position.set(sunLight.position.x + sunTargetAngle.x, sunLight.position.y + sunTargetAngle.y, sunLight.position.z + sunTargetAngle.z);
+                //sunTarget.position.set(sunLight.position.x + sunTargetAngle.x + playerPos.x, sunLight.position.y + sunTargetAngle.y + playerPos.y, sunLight.position.z + sunTargetAngle.z + playerPos.z)
+                //sunLight.position.add(sunLightOffset);
+                sunLight.shadow.camera.updateProjectionMatrix();
+            }
+
+            cameraPosition = playerPos.clone().add(playerLook.clone().multiplyScalar(-viewBehindOffset));
+            cameraPosition.y = 4.65;
+            
+            camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+            //camera.lookAt(playerLook.x + cameraPosition.x, cameraPosition.y, playerLook.z + cameraPosition.z);
+            var cameraTarget = playerPos.clone().add(playerLook.clone().multiplyScalar(viewForwardOffset));
+            camera.lookAt(cameraTarget.x, cameraTarget.y, cameraTarget.z);
+            //camera.lookAt(playerPos.x, playerPos.y, playerPos.z);
+            
+            camera.updateProjectionMatrix();
+            UpdatePlayerPosition();
+
+            fogUpdate();
+
+            // if (playerBike != undefined)
+            //     console.log(playerBike.name);
+
+            renderer.render(scene, camera);
+        });
+        
+
+        //this function is called when the window is resized
+        var MyResize = function () {
+            //get the new sizes
+            var width = window.innerWidth;
+            var height = window.innerHeight;
+            //then update the renderer
+            renderer.setSize(width, height);
+            //and update the aspect ratio of the camera
+            camera.aspect = width / height;
+
+            //update the projection matrix given the new values
+            camera.updateProjectionMatrix();
+
+            //and finally render the scene again
+            renderer.render(scene, camera);
+        };
+
+        // Input
+        var onKeyDown = function (event) {
+
+            switch (event.keyCode) {
+                case 38: // up
+                case 87: // w
+                    goDirForward = true;
+                    
+                    break;
+
+                case 37: // left
+                case 65: // a
+                    turnLeft = true;
+                    break;
+
+                case 40: // down
+                case 83: // s
+                    goDirBackward = true;
+                    break;
+
+                case 39: // right
+                case 68: // d
+                    turnRight = true;
+                    break;
+            }
+
+        };
+
+        var onKeyUp = function (event) {
+
+            switch (event.keyCode) {
+                case 38: // up
+                case 87: // w
+                    goDirForward = false;
+                    break;
+
+                case 37: // left
+                case 65: // a
+                    turnLeft = false;                    
+                    break;
+
+                case 40: // down
+                case 83: // s
+                    goDirBackward = false; 
+                    break;
+
+                case 39: // right
+                case 68: // d
+                    turnRight = false;                    
+                    break;
+            }
+        };
+
+        //link the resize of the window to the update of the camera
+        window.addEventListener('resize', MyResize);
+        document.addEventListener('keydown', onKeyDown, false);
+        document.addEventListener('keyup', onKeyUp, false);
+
+        function buildGui()
+        {
+            gui = new dat.GUI();
+            
+            //this is just a placeholder 
+            var params = {
+                urbanness: cur_urbanness
+            }
+
+            gui.add(params, 'urbanness', 0, 100).onChange(function(val){
+                cur_urbanness = val;
+            });
+
+            gui.open();
+
+        }
+
+        function lerp(a,b,t){
+            return a*t+b*(1-t);
+        }
+
+        buildGui();
+         
+    </script>
+    <script type="module">
+        import {  VRButton } from "./js/VRButton.js";
+        document.body.appendChild( VRButton.createButton( renderer ) );
+        renderer.xr.enabled = true;
+        renderer.vr.enabled = true;
+    </script>
+</body>
+</html>
