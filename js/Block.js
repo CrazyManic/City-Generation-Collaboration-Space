@@ -9,6 +9,7 @@ const highrise_min_threshold = 50;
 const highrise_threshold = 70;
 const house_threshold = 20;
 const farmhouse_threshold = 10;
+const grassplane_threshold = 7;
 
 class Block {
     constructor(position, scene) {
@@ -35,8 +36,10 @@ class Block {
             this.building = new HighriseBuilding(cur_urbanness, this.position, randCol);
         else if (randomBuildingSeed > house_threshold)
             this.building = new Building(cur_urbanness, this.position, randCol);
-        else 
+        else if (randomBuildingSeed > farmhouse_threshold)
             this.building = new FarmBuilding(cur_urbanness, this.position, randCol);
+        else
+            this.building = new GrassPlaneBuilding(cur_urbanness, this.position);
         
         // Roads
         this.roadGeoLong = new THREE.PlaneGeometry(streetWidth,gridSize);
