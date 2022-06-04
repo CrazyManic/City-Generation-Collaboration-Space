@@ -30,6 +30,7 @@ class Block {
 
         // Building
         var randCol = new THREE.Color(Math.random(), Math.random(), Math.random());
+        // var greenColor = new THREE.Color(0, 1, 0);
         // Decide on the building with some randomness
         var randomBuildingSeed = cur_urbanness + THREE.Math.randInt(-randomOffset, randomOffset);
         if (randomBuildingSeed > highrise_threshold && randomBuildingSeed < highrise_min_threshold)
@@ -39,7 +40,7 @@ class Block {
         else if (randomBuildingSeed > farmhouse_threshold)
             this.building = new FarmBuilding(cur_urbanness, this.position, randCol);
         else
-            this.building = new GrassPlaneBuilding(cur_urbanness, this.position);
+            this.building = new GrassPlaneBuilding(cur_urbanness, this.position, new THREE.Color(0, 1, 0));
         
         // Roads
         this.roadGeoLong = new THREE.PlaneGeometry(streetWidth,gridSize);
