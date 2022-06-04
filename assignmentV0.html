@@ -1,9 +1,9 @@
 <html>
+
 <head>
     <title>GroupAssessment</title>
 </head>
 <style>
-
     body {
         margin: 0;
     }
@@ -13,6 +13,7 @@
         height: 100%;
     }
 </style>
+
 <body>
     <!--include the three.js library-->
     <script src="js/three.js"></script>
@@ -21,14 +22,13 @@
     <script src="js/OrbitControls.js"></script>
     <script src="js/PLYLoader.js"></script>
     <script src="js/OBJLoader.js"></script>
-    <script src="js/MTLLoader.js"></script>    
+    <script src="js/MTLLoader.js"></script>
     <script src="js/Buildings.js"></script>
     <script src="js/FarmBuilding.js"></script>
     <script src="js/HighriseBuilding.js"></script>
     <script src="js/dat.gui.min.js"></script>
     <script src="js/GrassBuilding.js"></script>
     <style>
-
         body {
             font-family: Monospace;
             background-color: #000;
@@ -48,7 +48,7 @@
         <p>Procedural City Generation<br>
     </div>
 
-        <script>
+    <script>
 
         var scene = new THREE.Scene();//create the scene
 
@@ -60,12 +60,11 @@
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-         var fogcolor = 0xFFFFFF;
-         var fogdensity = 0.02;
-         var fogUpdate = function ()
-         {
-             scene.fog = new THREE.FogExp2(fogcolor, fogdensity);
-         }
+        var fogcolor = 0xFFFFFF;
+        var fogdensity = 0.02;
+        var fogUpdate = function () {
+            scene.fog = new THREE.FogExp2(fogcolor, fogdensity);
+        }
 
 
 
@@ -81,16 +80,16 @@
         // for real game set it more like (0, 5, -15). Also this will get overwritten at some point in the code
         var cameraPosition = new THREE.Vector3(0, 0, 0);
         camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);//set the cas
-        var cameralight = new THREE.PointLight( new THREE.Color(1,1,1), 0.5 );
+        var cameralight = new THREE.PointLight(new THREE.Color(1, 1, 1), 0.5);
         var viewBehindOffset = 10;
-        camera.add( cameralight );
+        camera.add(cameralight);
         scene.add(camera);
 
         // We can change the colour and intensity of the sunlight through the simulation
         var sunLightColour = new THREE.Color(0xfffee0);
         var sunLight = new THREE.DirectionalLight(sunLightColour, 1);
-        var sunLightOffset = new THREE.Vector3(0,100,0);
-        sunLight.position.set(0,100,0);
+        var sunLightOffset = new THREE.Vector3(0, 100, 0);
+        sunLight.position.set(0, 100, 0);
         sunLight.castShadow = true;
         sunLight.shadow.mapSize.width = 2048; // default
         sunLight.shadow.mapSize.height = 2048; // default
@@ -116,57 +115,54 @@
         var boxMat = new THREE.MeshLambertMaterial();
         boxMat.color = new THREE.Color(0.6, 0.3, 0.0, 1.0);
         var box = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.5, 2.5), boxMat);
-        box.position.set(0,0,0);
+        box.position.set(0, 0, 0);
         //scene.add(box);
 
-    //   //Bike model
+        //   //Bike model
         var bikeScale = 2;
-        var baseBikeRotation = new THREE.Vector3(-90 * Math.PI/180,0,-90 * Math.PI/180);
+        var baseBikeRotation = new THREE.Vector3(-90 * Math.PI / 180, 0, -90 * Math.PI / 180);
         var bikeRotationMatrix = new THREE.Matrix4();
         //bikeRotationMatrix.makeRotationX(-90 * Math.PI/180);
         //bikeRotationMatrix.makeRotationZ(-90 * Math.PI/180)
-        bikeRotationMatrix.multiply(new THREE.Matrix4().makeRotationX(-90 * Math.PI/180)
-            .multiply(new THREE.Matrix4().makeRotationZ(-90 * Math.PI/180)) );
-        var playerBike; 
+        bikeRotationMatrix.multiply(new THREE.Matrix4().makeRotationX(-90 * Math.PI / 180)
+            .multiply(new THREE.Matrix4().makeRotationZ(-90 * Math.PI / 180)));
+        var playerBike;
         var bikeReady = false;
-        function loadBike(mesh){ 
-            playerBike = mesh.clone(); 
-            console.log('loading bike into variable'); 
+        function loadBike(mesh) {
+            playerBike = mesh.clone();
+            console.log('loading bike into variable');
             bikeReady = true;
             scene.add(playerBike);
         }
         var mtlloader = new THREE.MTLLoader();
-        mtlloader.setPath('models/') 
-        mtlloader.load('11717_bicycle_v2_L1.mtl', function (materials)
-        {
+        mtlloader.setPath('models/')
+        mtlloader.load('11717_bicycle_v2_L1.mtl', function (materials) {
             materials.preload();
             var objloader = new THREE.OBJLoader();
-            objloader.setMaterials( materials );
+            objloader.setMaterials(materials);
             objloader.setPath('models/')
-            objloader.load('11717_bicycle_v2_L1.obj', function (bike)
-            {
+            objloader.load('11717_bicycle_v2_L1.obj', function (bike) {
                 //playerBike = bike.clone();
                 //bike = bike.clone();
                 var boundbox3 = new THREE.Box3();
-                boundbox3.setFromObject (bike);
+                boundbox3.setFromObject(bike);
                 var CenterBB = new THREE.Vector3();
                 var SizeBB = new THREE.Vector3();
                 boundbox3.getCenter(CenterBB);
                 boundbox3.getSize(SizeBB);
-                for ( var i = 0, l = bike.children.length; i < l; i ++ ) 
-                {
-                    bike.children[i].material.color= new THREE.Color(1,1,1);
+                for (var i = 0, l = bike.children.length; i < l; i++) {
+                    bike.children[i].material.color = new THREE.Color(1, 1, 1);
                 }
-            
+
                 var translation = new THREE.Matrix4();
                 var scale = new THREE.Matrix4();
                 var combinedScaTra = new THREE.Matrix4();
-                
-                bike.rotation.set(baseBikeRotation.x,baseBikeRotation.y,baseBikeRotation.z);
+
+                bike.rotation.set(baseBikeRotation.x, baseBikeRotation.y, baseBikeRotation.z);
 
                 //adjust scale and translation on what you need 
-                scale.makeScale(bikeScale/SizeBB.length(), bikeScale/SizeBB.length(), bikeScale/SizeBB.length());
-                translation.makeTranslation (-CenterBB.x,-CenterBB.y + bikeScale/2,-CenterBB.z);
+                scale.makeScale(bikeScale / SizeBB.length(), bikeScale / SizeBB.length(), bikeScale / SizeBB.length());
+                translation.makeTranslation(-CenterBB.x, -CenterBB.y + bikeScale / 2, -CenterBB.z);
                 combinedScaTra.multiply(scale);
                 combinedScaTra.multiply(translation);
 
@@ -185,16 +181,16 @@
             });
 
         });
-        
+
         // Set game constants
         var loadRadius = gridSize * 6.5;
-        console.log('Blocks grid size: ' + gridSize); 
+        console.log('Blocks grid size: ' + gridSize);
 
         // Set game variables
         var playerPos = new THREE.Vector3(0, 0, 0);
         var playerLook = new THREE.Vector3(0, 0, 1);
-        var velo = new THREE.Vector3(0,0,0); //velocity
-        var accel = new THREE.Vector3(0,0,0);//acceleration
+        var velo = new THREE.Vector3(0, 0, 0); //velocity
+        var accel = new THREE.Vector3(0, 0, 0);//acceleration
 
         // Generation amounts
         var cur_urbanness = 50;
@@ -223,13 +219,13 @@
         // Initialise blocks
         let blocks = new LinkedList();
         let intRad = (loadRadius / gridSize);
-        for (y = intRad; y >= -intRad; y--){
-            for (x = intRad; x >= -intRad; x--){
-                if ((x*x + y*y) <= intRad * intRad){
+        for (y = intRad; y >= -intRad; y--) {
+            for (x = intRad; x >= -intRad; x--) {
+                if ((x * x + y * y) <= intRad * intRad) {
                     //console.log('(' + x + ',' + y+'): ('+ (x*gridSize) + ',' + (y*gridSize)+')');
-                    var newBlock = new Block(new THREE.Vector3(x * gridSize, 0.0, y*gridSize), scene);
-                    newBlock.position = new THREE.Vector3(x * gridSize, 0.0, y*gridSize);
-                    newBlock.floor.position = new THREE.Vector3(x * gridSize, 0.0, y*gridSize);
+                    var newBlock = new Block(new THREE.Vector3(x * gridSize, 0.0, y * gridSize), scene);
+                    newBlock.position = new THREE.Vector3(x * gridSize, 0.0, y * gridSize);
+                    newBlock.floor.position = new THREE.Vector3(x * gridSize, 0.0, y * gridSize);
                     blocks.addNodeAtTail(newBlock);
                     //console.log("floor.pos: " + newBlock.floor.position + " pos: " + newBlock.position);
                 }
@@ -258,7 +254,7 @@
         //var delta = clock.getDelta(); // use this as necessary, just not in this scope.
 
         function ConvertToGrid(inVec) {
-            return new THREE.Vector3(Math.round(inVec.x / gridSize) * gridSize, Math.round(inVec.y / gridSize) * gridSize, Math.round(inVec.z / gridSize) * gridSize, );
+            return new THREE.Vector3(Math.round(inVec.x / gridSize) * gridSize, Math.round(inVec.y / gridSize) * gridSize, Math.round(inVec.z / gridSize) * gridSize,);
         }
 
         var updateShadows = false;
@@ -281,18 +277,18 @@
                 }
             }
             // Generate new blocks
-            for (y = intRad; y >= -intRad; y--){
-                for (x = intRad; x >= -intRad; x--){
-                    if ((x*x + y*y) <= intRad * intRad){
+            for (y = intRad; y >= -intRad; y--) {
+                for (x = intRad; x >= -intRad; x--) {
+                    if ((x * x + y * y) <= intRad * intRad) {
                         var posUsed = false;
-                        var thisPos = new THREE.Vector3(x * gridSize, 0.0, y*gridSize).add(ConvertToGrid(playerPos));
-                        for (i=0; i < blocks.size; i++){
-                            if (blocks.getNodeAtIndex(i).position.equals(thisPos)){
+                        var thisPos = new THREE.Vector3(x * gridSize, 0.0, y * gridSize).add(ConvertToGrid(playerPos));
+                        for (i = 0; i < blocks.size; i++) {
+                            if (blocks.getNodeAtIndex(i).position.equals(thisPos)) {
                                 posUsed = true;
                                 //console.log("Block already occupied: ("+thisPos.x+','+thisPos.y+')');
                             }
                         }
-                        if (!posUsed){
+                        if (!posUsed) {
                             //console.log('(' + x + ',' + y+'): ('+ (x*gridSize) + ',' + (y*gridSize)+')');
                             var newBlock = new Block(thisPos, scene);
                             newBlock.position = thisPos;
@@ -318,9 +314,9 @@
         //var bldg_2 = new Building(0, new THREE.Vector3(30, 0, 0), new THREE.Color(0,1,0));  // Green, not at all urban
         //var bldg_3 = new Building(30, new THREE.Vector3(60, 0, 0), new THREE.Color(0,0,1)); // Blue, sometimes highrise, usually not
 
-        
-        var cameraVRAngle = false; 
-        var cameraTopAngle = false; 
+
+        var cameraVRAngle = false;
+        var cameraTopAngle = false;
 
         var turnRight = false;
         var turnLeft = false;
@@ -339,46 +335,48 @@
         var bikeTurnRate = 0.2;
         var viewForwardOffset = 8;
 
-        var MyUpdateLoop = function () {
-            // code
 
+    
+        
+        //camera.add(renderer.xr.getCamera());
+        renderer.setAnimationLoop(function () {
+            // code
+            
+            
+            //console.log(renderer.xr.getCamera().position.x);
             //turning code (This is just a code to get started when we do rotations)
             var delta = clock.getDelta();
 
-            if (turnRight == true) 
-            {
+            if (turnRight == true) {
                 rotationAngle -= rotationSpeed * delta;
                 playerLook.x = Math.sin(rotationAngle);
                 playerLook.z = Math.cos(rotationAngle);
                 playerLook.normalize();
             }
-            if (turnLeft == true)
-            {
+            if (turnLeft == true) {
                 rotationAngle += rotationSpeed * delta;
                 playerLook.x = Math.sin(rotationAngle);
                 playerLook.z = Math.cos(rotationAngle);
-                playerLook.normalize(); 
+                playerLook.normalize();
             }
-            if (goDirForward == true)
-            {
-                playerPos.x += playerLook.x*moveSpeed*delta;
-                playerPos.z += playerLook.z*moveSpeed*delta;
-            } 
-            if (goDirBackward == true)
-            {
-                playerPos.x -= playerLook.x*reverseSpeed*delta;
-                playerPos.z -= playerLook.z*reverseSpeed*delta;
+            if (goDirForward == true) {
+                playerPos.x += playerLook.x * moveSpeed * delta;
+                playerPos.z += playerLook.z * moveSpeed * delta;
+            }
+            if (goDirBackward == true) {
+                playerPos.x -= playerLook.x * reverseSpeed * delta;
+                playerPos.z -= playerLook.z * reverseSpeed * delta;
             }
             if (goDirForward || goDirBackward)
                 bikeRotation = lerp(rotationAngle, bikeRotation, bikeTurnRate);
-            
-            var vertOffset = new THREE.Vector3(0,playerPos.y, 0);
+
+            var vertOffset = new THREE.Vector3(0, playerPos.y, 0);
             var playerFaceLoc = playerPos.clone().add(playerLook).add(vertOffset);
-            
-            if (bikeReady){ // if the bike mesh has loaded
+
+            if (bikeReady) { // if the bike mesh has loaded
                 // all matrices version
-                playerBike.position.set(0,0,0);
-                playerBike.rotation.set(0,0,0);
+                playerBike.position.set(0, 0, 0);
+                playerBike.rotation.set(0, 0, 0);
                 var secondaryRot = new THREE.Matrix4().makeRotationY(bikeRotation);
                 var translation = new THREE.Matrix4().makeTranslation(playerPos.x, playerPos.y, playerPos.z);
                 var combined = new THREE.Matrix4();
@@ -386,9 +384,10 @@
                 combined.multiply(secondaryRot);
                 combined.multiply(bikeRotationMatrix);
                 playerBike.applyMatrix4(combined);
+                
             }
 
-            if (updateShadows){
+            if (updateShadows) {
                 //sunLight.position = playerPos + sunLightOffset;
                 sunLight.position.set(playerPos.x, playerPos.y + sunLightOffset.y, playerPos.z);
                 sunTarget.position.set(sunLight.position.x + sunTargetAngle.x, sunLight.position.y + sunTargetAngle.y, sunLight.position.z + sunTargetAngle.z);
@@ -398,40 +397,26 @@
             }
 
             cameraPosition = playerPos.clone().add(playerLook.clone().multiplyScalar(-viewBehindOffset));
-          
-            if (cameraTopAngle == true)
-            {
+
+            if (cameraTopAngle == true) {
                 fogdensity = 0;
                 cameraTopAngle = true;
                 cameraVRAngle = false;
-                cameraPosition.y = 50; 
+                cameraPosition.y = 50;
 
             }
-            else
-            {
+            else {
                 fogdensity = 0.02;
                 cameraPosition.y = 5;
             }
 
-            // You have to turn off Bird_Eye_View to get this working first 
-            if (cameraVRAngle == true) 
-            {
-                fogdensity = 0.02;
-                // VR view stuff goes here!
-                cameraTopAngle = false;
-                cameraVRAngle = true;
-                cameraPosition.y = 5; 
-                console.log("testing");
-            }
-
-
-            
             camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
             //camera.lookAt(playerLook.x + cameraPosition.x, cameraPosition.y, playerLook.z + cameraPosition.z);
+            
             var cameraTarget = playerPos.clone().add(playerLook.clone().multiplyScalar(viewForwardOffset));
             camera.lookAt(cameraTarget.x, cameraTarget.y, cameraTarget.z);
             //camera.lookAt(playerPos.x, playerPos.y, playerPos.z);
-            
+
             camera.updateProjectionMatrix();
             UpdatePlayerPosition();
 
@@ -439,11 +424,24 @@
 
             // if (playerBike != undefined)
             //     console.log(playerBike.name);
+            if (renderer.xr.isPresenting && bikeReady)
+                if (playerBike.visible == true)
+                    playerBike.visible = false;
+                
+            else if ((!renderer.xr.isPresenting && bikeReady)){
+                if (playerBike.visible == false)
+                    playerBike.visible = true;
+            }
 
             renderer.render(scene, camera);
-            requestAnimationFrame(MyUpdateLoop);
-        }
-        requestAnimationFrame(MyUpdateLoop);
+        });
+    </script>
+    <script>
+            
+
+
+
+
 
         //this function is called when the window is resized
         var MyResize = function () {
@@ -469,6 +467,7 @@
                 case 38: // up
                 case 87: // w
                     goDirForward = true;
+
                     break;
 
                 case 37: // left
@@ -499,17 +498,17 @@
 
                 case 37: // left
                 case 65: // a
-                    turnLeft = false;                    
+                    turnLeft = false;
                     break;
 
                 case 40: // down
                 case 83: // s
-                    goDirBackward = false; 
+                    goDirBackward = false;
                     break;
 
                 case 39: // right
                 case 68: // d
-                    turnRight = false;                    
+                    turnRight = false;
                     break;
             }
         };
@@ -519,41 +518,60 @@
         document.addEventListener('keydown', onKeyDown, false);
         document.addEventListener('keyup', onKeyUp, false);
 
-        function buildGui()
-        {
+        function buildGui() {
             gui = new dat.GUI();
-            
+
             //this is just a placeholder 
             var params = {
                 urbanness: cur_urbanness,
                 Bird_Eye_View: cameraTopAngle,
-                VR_View: cameraVRAngle 
+                //VR_View: cameraVRAngle
             }
 
-            gui.add(params, 'urbanness', 0, 100).onChange(function(val){
+            gui.add(params, 'urbanness', 0, 100).onChange(function (val) {
                 cur_urbanness = val;
             });
 
-            gui.add(params, 'Bird_Eye_View').onChange(function(val)
-            {
+            gui.add(params, 'Bird_Eye_View').onChange(function (val) {
                 cameraTopAngle = val
             });
-
-            gui.add(params, 'VR_View').onChange(function(val)
-            {
-                cameraVRAngle = val
-            });  
 
             gui.open();
 
         }
 
-        function lerp(a,b,t){
-            return a*t+b*(1-t);
+        function lerp(a, b, t) {
+            return a * t + b * (1 - t);
         }
 
         buildGui();
-         
+
     </script>
+    <script type="module">
+        import { VRButton } from "./js/VRButton.js";
+        
+        document.body.appendChild(VRButton.createButton(renderer));
+
+        renderer.xr.enabled = true;
+        for (var i = 0; i < 2; i++) {
+
+            const controller = renderer.xr.getController(0);
+
+            controller.addEventListener( 'connected', (e) => {
+
+                controller.gamepad = e.data.gamepad
+            });
+            let controllerModel = renderer.xr.getControllerGrip(i);
+            let geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+            let material = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
+            let cube = new THREE.Mesh(geometry, material);
+            controllerModel.add(cube);
+            scene.add(controllerModel);
+            
+        }
+        
+    </script>
+
 </body>
+
 </html>
