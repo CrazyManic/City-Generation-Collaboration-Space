@@ -409,18 +409,6 @@
                 cameraPosition.y = 5;
             }
 
-            // You have to turn off Bird_Eye_View to get this working first 
-            if (cameraVRAngle == true) {
-                fogdensity = 0.02;
-                // VR view stuff goes here!
-                cameraTopAngle = false;
-                cameraVRAngle = true;
-                cameraPosition.y = 5;
-                console.log("testing");
-            }
-
-
-
             camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
             //camera.lookAt(playerLook.x + cameraPosition.x, cameraPosition.y, playerLook.z + cameraPosition.z);
             
@@ -546,10 +534,6 @@
             gui.add(params, 'Bird_Eye_View').onChange(function (val) {
                 cameraTopAngle = val
             });
-
-            // gui.add(params, 'VR_View').onChange(function (val) {
-            //     cameraVRAngle = val
-            // });
 
             gui.open();
 
