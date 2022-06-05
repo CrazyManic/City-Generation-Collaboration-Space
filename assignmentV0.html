@@ -28,6 +28,7 @@
     <script src="js/HighriseBuilding.js"></script>
     <script src="js/dat.gui.min.js"></script>
     <script src="js/GrassBuilding.js"></script>
+    <script src="js/MeshBuilding.js"></script>
     <style>
         body {
             font-family: Monospace;
@@ -112,6 +113,53 @@
         //const helper = new THREE.CameraHelper( sunLight.shadow.camera );
         //scene.add( helper );
 
+        // Load our meshes
+        const modelDirectory = "Models/";
+        //var plyLoader = new THREE.PLYLoader();
+        //var modelsPLY = ["basic house 1 whole.ply"];
+        // OBJ stuff https://github.com/mrdoob/three.js/blob/dev/examples/webgl_loader_obj.html 
+        function loadModel() {
+            object.traverse( function ( child ) {
+                if ( child.isMesh ) child.material.map = texture;
+            } );
+            object.position.y = - 95;
+            scene.add( object );
+        }
+        const manager = new THREE.LoadingManager( loadModel );
+        function onProgress( xhr ) {
+            if ( xhr.lengthComputable ) {
+                const percentComplete = xhr.loaded / xhr.total * 100;
+                console.log( 'model ' + Math.round( percentComplete, 2 ) + '% downloaded' );
+            }
+        }
+        function onError() {}
+        const loader = new OBJLoader( manager );
+
+        var modelsOBJ = ["basic house 1 full.obj"];
+        var loadedMeshes = [];
+        for (let fileIndex=0; fileIndex < modelsPLY.length; fileIndex++){
+            var itMesh;
+            //console.log('loading: ' + (modelDirectory+modelsPLY[fileIndex]));
+            //plyLoader.load(modelDirectory+modelsPLY[fileIndex], function(impGeometry){
+            loader.load(modelDirectory+modelsPLY[fileIndex], function ( obj ) {
+                object = obj;
+                var impMaterial = new THREE.MeshLambertMaterial();
+                impMaterial.color = midGrey;
+                impGeometry.computeVertexNormals();
+                itMesh = new THREE.Mesh(impGeometry, impMaterial);
+                //itMesh.position.set(this.position.x, this.position.y, this.position.z);
+                itMesh.position.y = 10;
+                itMesh.position.z = -5;
+                itMesh.rotation.z = Math.PI / 2;
+                //itMesh.scale.multiplyScalar(0.1);
+                itMesh.castShadow = true;
+                itMesh.receiveShadow = true;
+                loadedMeshes.push(itMesh);
+                scene.add(itMesh);
+                console.log('loaded a ply file: ' + modelsPLY[fileIndex]);
+            }, onProgress, onError );
+        }
+
         var boxMat = new THREE.MeshLambertMaterial();
         boxMat.color = new THREE.Color(0.6, 0.3, 0.0, 1.0);
         var box = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.5, 2.5), boxMat);
@@ -195,6 +243,10 @@
         // Generation amounts
         var cur_urbanness = 50;
 
+        // testing string manipulation
+        //var testString = "abcdef.ply";
+        //var endString = testString.slice(testString.length - 4);
+        //console.log(endString);
 
         // // testing linked list
         // var list = new LinkedList();
