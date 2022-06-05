@@ -23,6 +23,7 @@
     <script src="js/PLYLoader.js"></script>
     <script src="js/OBJLoader.js"></script>
     <script src="js/MTLLoader.js"></script>
+    <script src="js/STLLoader.js"></script>
     <script src="js/Buildings.js"></script>
     <script src="js/FarmBuilding.js"></script>
     <script src="js/HighriseBuilding.js"></script>
@@ -113,51 +114,57 @@
         //const helper = new THREE.CameraHelper( sunLight.shadow.camera );
         //scene.add( helper );
 
-        // Load our meshes
-        const modelDirectory = "Models/";
-        //var plyLoader = new THREE.PLYLoader();
-        //var modelsPLY = ["basic house 1 whole.ply"];
-        // OBJ stuff https://github.com/mrdoob/three.js/blob/dev/examples/webgl_loader_obj.html 
-        function loadModel() {
-            object.traverse( function ( child ) {
-                if ( child.isMesh ) child.material.map = texture;
-            } );
-            object.position.y = - 95;
-            scene.add( object );
-        }
-        const manager = new THREE.LoadingManager( loadModel );
-        function onProgress( xhr ) {
-            if ( xhr.lengthComputable ) {
-                const percentComplete = xhr.loaded / xhr.total * 100;
-                console.log( 'model ' + Math.round( percentComplete, 2 ) + '% downloaded' );
-            }
-        }
-        function onError() {}
-        const loader = new OBJLoader( manager );
+        // MESHES
+        const modelDirectory = 'models/';
+        const modelFiles = ['basic house body.stl','basic house roof.stl','basic house windows.stl'];//'basic house full.stl'
+        var models = [];
+        var modelGeos = [];
+        var meshLoadingDone = false;
+        const stlloader = new THREE.STLLoader();
+        var loaderMat = new THREE.MeshLambertMaterial();
+        loaderMat.color = new THREE.Color(0.9,0.7,0.78);//0xAA2200;
+        var loadMesh = null;
+        var scale = 0.45;
+        var scaleVec = new THREE.Vector3(scale, scale, scale);
+        var center = new THREE.Vector3();
+        var size = new THREE.Vector3();
+        var sca = new THREE.Matrix4();
+        var tra = new THREE.Matrix4();
+        var rot = new THREE.Matrix4();
+        var combined = new THREE.Matrix4();
+        for (let loadIt=0; loadIt < modelFiles.length; loadIt++){
+            stlloader.load(modelDirectory+modelFiles[loadIt], function (geometry) {
+                console.log('starting load on mesh: ' + modelFiles[loadIt]);
+                geometry.computeVertexNormals();
+                modelGeos.push(geometry);
+                loadMesh = new THREE.Mesh(geometry, loaderMat);
 
-        var modelsOBJ = ["basic house 1 full.obj"];
-        var loadedMeshes = [];
-        for (let fileIndex=0; fileIndex < modelsPLY.length; fileIndex++){
-            var itMesh;
-            //console.log('loading: ' + (modelDirectory+modelsPLY[fileIndex]));
-            //plyLoader.load(modelDirectory+modelsPLY[fileIndex], function(impGeometry){
-            loader.load(modelDirectory+modelsPLY[fileIndex], function ( obj ) {
-                object = obj;
-                var impMaterial = new THREE.MeshLambertMaterial();
-                impMaterial.color = midGrey;
-                impGeometry.computeVertexNormals();
-                itMesh = new THREE.Mesh(impGeometry, impMaterial);
-                //itMesh.position.set(this.position.x, this.position.y, this.position.z);
-                itMesh.position.y = 10;
-                itMesh.position.z = -5;
-                itMesh.rotation.z = Math.PI / 2;
-                //itMesh.scale.multiplyScalar(0.1);
-                itMesh.castShadow = true;
-                itMesh.receiveShadow = true;
-                loadedMeshes.push(itMesh);
-                scene.add(itMesh);
-                console.log('loaded a ply file: ' + modelsPLY[fileIndex]);
-            }, onProgress, onError );
+                loadMesh.applyMatrix4(bikeRotationMatrix);
+                loadMesh.scale.set(scaleVec.x, scaleVec.y, scaleVec.z);
+                loadMesh.position.set(0,0,10*loadIt);
+                loadMesh.name = modelFiles[loadIt];
+
+                //scene.add(loadMesh);
+                models.push(loadMesh);
+                scene.add(loadMesh);
+                console.log('loaded mesh: ' + loadMesh.name);
+                CheckLoadingDone();
+            });
+        }
+
+        function CheckLoadingDone(){
+            if (models.length == modelFiles.length){
+                meshLoadingDone = true;
+                console.log('Mesh loading check success.');
+                // for (let i=0; i<models.length; i++){
+                //     console.log('Mesh['+i+']: ' + models[i].name + ', geo: ');
+                //     console.log(modelGeos[i])
+                // }
+                // Generate world
+
+                return true;
+            }
+            return false;
         }
 
         var boxMat = new THREE.MeshLambertMaterial();
@@ -166,7 +173,7 @@
         box.position.set(0, 0, 0);
         //scene.add(box);
 
-        //   //Bike model
+        //   //Bike model, an OBJ
         var bikeScale = 2;
         var baseBikeRotation = new THREE.Vector3(-90 * Math.PI / 180, 0, -90 * Math.PI / 180);
         var bikeRotationMatrix = new THREE.Matrix4();

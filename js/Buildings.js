@@ -45,23 +45,6 @@ class Building{
 
     //pColor1, pColor2, pColor3
     Generate(urbanness, paramColours, mesh_files){ // Overwrite this function in descendent classes to implement different building types. 
-        // console.log("Urbanness is "+urbanness);
-        // // 1: using the urbanness, determine which building to generate
-        // // lower to 0 = more chance of a house
-        // var threshold_highrise = 100 - urbanness;
-        // var buildingtype_rand = Math.random()*100;
-        // console.log(buildingtype_rand);
-        // // 2: using the urbanness, change the building size
-        // // lower to 0 = smaller building
-        // if (buildingtype_rand > threshold_highrise)
-        // {
-        //     console.log("Generate highrise");
-        //     this.buildingType = 1; // highrise
-        // }
-        // else{ 
-        //     console.log("Generate house"); 
-        //     this.buildingType = 0;
-        // }
         var singlehouseLength = blockLength - (blockLengthOffset * Math.random());
         this.height = building_baseheight[0] + randExtraHeight * Math.random() *2; // 2x for more varied building height
         // * building_height_randomness[this.buildingType] * Math.random()
@@ -69,7 +52,7 @@ class Building{
         this.bldg_geom = new THREE.BoxGeometry(singlehouseLength, this.height, singlehouseLength);    
         this.bldg_mat = new THREE.MeshPhongMaterial();  
         this.bldg_mat.color = paramColours[0];
-        console.log(this.height);
+        //console.log(this.height);
     }
 
     Destroy(){

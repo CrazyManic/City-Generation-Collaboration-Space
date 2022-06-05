@@ -33,11 +33,11 @@ class Block {
         // Decide on the building with some randomness
         var randomBuildingSeed = cur_urbanness + THREE.Math.randInt(-randomOffset, randomOffset);
         if (randomBuildingSeed > highrise_threshold && randomBuildingSeed < highrise_min_threshold)
-            this.building = new HighriseBuilding(cur_urbanness, this.position, randCol);
+            this.building = new HighriseBuilding(cur_urbanness, this.position, [randCol]);
         else if (randomBuildingSeed > house_threshold)
-            this.building = new Building(cur_urbanness, this.position, randCol);
+            this.building = new Building(cur_urbanness, this.position, [randCol]);
         else if (randomBuildingSeed > farmhouse_threshold)
-            this.building = new FarmBuilding(cur_urbanness, this.position, randCol);
+            this.building = new FarmBuilding(cur_urbanness, this.position, [randCol]);
         else
             this.building = new GrassPlaneBuilding(cur_urbanness, this.position);
         
