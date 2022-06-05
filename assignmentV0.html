@@ -23,11 +23,13 @@
     <script src="js/PLYLoader.js"></script>
     <script src="js/OBJLoader.js"></script>
     <script src="js/MTLLoader.js"></script>
+    <script src="js/STLLoader.js"></script>
     <script src="js/Buildings.js"></script>
     <script src="js/FarmBuilding.js"></script>
     <script src="js/HighriseBuilding.js"></script>
     <script src="js/dat.gui.min.js"></script>
     <script src="js/GrassBuilding.js"></script>
+    <script src="js/MeshBuilding.js"></script>
     <style>
         body {
             font-family: Monospace;
@@ -51,7 +53,8 @@
     <script>
 
         var scene = new THREE.Scene();//create the scene
-
+        let basic_house_geos;
+        let playground_geos;
         var renderer = new THREE.WebGLRenderer();//create the webgl renderer
         renderer.setSize(window.innerWidth, window.innerHeight);
         //add the renderer to the current document
@@ -112,13 +115,59 @@
         //const helper = new THREE.CameraHelper( sunLight.shadow.camera );
         //scene.add( helper );
 
+        // MESHES
+        const modelDirectory = 'models/';
+        const modelFiles = ['basic house body.stl','basic house roof.stl','basic house windows.stl', 
+            'pg tower.stl', 'pg slide and ladder.stl', 'pg seesaw.stl'];
+        var models = [];
+        var modelGeos = [];
+        var meshLoadingDone = false;
+        const stlloader = new THREE.STLLoader();
+        var loaderMat = new THREE.MeshLambertMaterial();
+        loaderMat.color = new THREE.Color(0.9,0.7,0.78);//0xAA2200;
+        var loadMesh = null;
+        var scale = 0.8;
+        var scaleVec = new THREE.Vector3(scale, scale, scale);
+        var combined = new THREE.Matrix4();
+        for (let loadIt=0; loadIt < modelFiles.length; loadIt++){
+            stlloader.load(modelDirectory+modelFiles[loadIt], function (geometry) {
+                console.log('starting load on mesh: ' + modelFiles[loadIt]);
+                geometry.computeVertexNormals();
+                modelGeos.push(geometry);
+                loadMesh = new THREE.Mesh(geometry, loaderMat);
+
+                loadMesh.applyMatrix4(bikeRotationMatrix);
+                loadMesh.scale.set(scaleVec.x, scaleVec.y, scaleVec.z);
+                loadMesh.position.set(0,0,10*loadIt);
+                loadMesh.name = modelFiles[loadIt];
+
+                models.push(loadMesh);
+                console.log('loaded mesh: ' + loadMesh.name);
+                CheckLoadingDone();
+            });
+        }
+
+        
+        function CheckLoadingDone(){
+            if (modelGeos.length == modelFiles.length){
+                meshLoadingDone = true;
+                console.log('Mesh loading check success.');
+                basic_house_geos = [modelGeos[0], modelGeos[1], modelGeos[2]];  // body, roof, windows
+                playground_geos = [modelGeos[3], modelGeos[4], modelGeos[5]];   // tower, slide, seesaw
+                // Generate world
+                BuildBlocks();
+                return true;
+            }
+            return false;
+        }
+
         var boxMat = new THREE.MeshLambertMaterial();
         boxMat.color = new THREE.Color(0.6, 0.3, 0.0, 1.0);
         var box = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.5, 2.5), boxMat);
         box.position.set(0, 0, 0);
         //scene.add(box);
 
-        //   //Bike model
+        //   //Bike model, an OBJ
         var bikeScale = 2;
         var baseBikeRotation = new THREE.Vector3(-90 * Math.PI / 180, 0, -90 * Math.PI / 180);
         var bikeRotationMatrix = new THREE.Matrix4();
@@ -195,20 +244,10 @@
         // Generation amounts
         var cur_urbanness = 50;
 
-
-        // // testing linked list
-        // var list = new LinkedList();
-        // list.addNodeAtHead('start');
-        // console.log(list.size);
-        // console.log(list.getNodeAtIndex(0));
-        // list.addNodeAtTail('middle');
-        // list.addNodeAtTail('end');
-        // console.log(list.head);
-        // console.log(list.getNodeAtIndex(5));
-        // console.log(list.head.next.value);
-        // list.removeNodeAt(1);
-        // console.log(list.getNodeAtIndex(1));
-        // // end test linked list
+        // testing string manipulation
+        //var testString = "abcdef.ply";
+        //var endString = testString.slice(testString.length - 4);
+        //console.log(endString);
 
         // movement variables
         var turnRight = false;
@@ -219,36 +258,23 @@
         // Initialise blocks
         let blocks = new LinkedList();
         let intRad = (loadRadius / gridSize);
-        for (y = intRad; y >= -intRad; y--) {
-            for (x = intRad; x >= -intRad; x--) {
-                if ((x * x + y * y) <= intRad * intRad) {
-                    //console.log('(' + x + ',' + y+'): ('+ (x*gridSize) + ',' + (y*gridSize)+')');
-                    var newBlock = new Block(new THREE.Vector3(x * gridSize, 0.0, y * gridSize), scene);
-                    newBlock.position = new THREE.Vector3(x * gridSize, 0.0, y * gridSize);
-                    newBlock.floor.position = new THREE.Vector3(x * gridSize, 0.0, y * gridSize);
-                    blocks.addNodeAtTail(newBlock);
-                    //console.log("floor.pos: " + newBlock.floor.position + " pos: " + newBlock.position);
+        function BuildBlocks() {
+            for (y = intRad; y >= -intRad; y--) {
+                for (x = intRad; x >= -intRad; x--) {
+                    if ((x * x + y * y) <= intRad * intRad) {
+                        //console.log('(' + x + ',' + y+'): ('+ (x*gridSize) + ',' + (y*gridSize)+')');
+                        var newBlock = new Block(new THREE.Vector3(x * gridSize, 0.0, y * gridSize), scene);
+                        newBlock.position = new THREE.Vector3(x * gridSize, 0.0, y * gridSize);
+                        newBlock.floor.position = new THREE.Vector3(x * gridSize, 0.0, y * gridSize);
+                        blocks.addNodeAtTail(newBlock);
+                        //console.log("floor.pos: " + newBlock.floor.position + " pos: " + newBlock.position);
+                    }
+                    //else
+                    //    console.log('NOT (' + x + ',' + y+')');
                 }
-                //else
-                //    console.log('NOT (' + x + ',' + y+')');
             }
         }
-        //console.log(blocks.head.value.floor.position);
-        //console.log(blocks.head.next.value.floor.position);
-        //console.log(blocks.head.next.next.value.floor.position);
-        //box.position.set(blocks.head.next.next.value.floor.position);
         box.position.set(0, 0, 0);
-        //camera.lookAt(blocks.head.next.next.value.floor.position);
-        // for (rows=intRad; rows >= -intRad; rows--){
-        //     //var theta = Math.asin(rows/intRad);
-        //     var theta = Math.ceil(Math.acos(rows / intRad));
-        //     var genWidth = Math.ceil(intRad/2 * Math.acos(theta));
-        //     console.log("New row: " + rows + ", with width: " + genWidth + "\tTheta: " + theta + "\tacos: " + Math.acos(theta));
-        //     for (cols = genWidth; cols >= -genWidth; cols--){
-        //         //console.log("Adding block at: (" + cols + ", " + rows + ")");
-        //         //blocks.addNodeAtTail(new Block(new THREE.Vector3(rows * gridSize, cols*gridSize, 0.0)));
-        //     }
-        // }
 
         const clock = new THREE.Clock();
         //var delta = clock.getDelta(); // use this as necessary, just not in this scope.
@@ -418,7 +444,9 @@
             //camera.lookAt(playerPos.x, playerPos.y, playerPos.z);
 
             camera.updateProjectionMatrix();
-            UpdatePlayerPosition();
+            if (meshLoadingDone){
+                UpdatePlayerPosition();
+            }
 
             fogUpdate();
 
@@ -433,7 +461,8 @@
                     playerBike.visible = true;
             }
 
-            renderer.render(scene, camera);
+            //if (meshLoadingDone)
+                renderer.render(scene, camera);
         });
     </script>
     <script>

@@ -10,7 +10,7 @@ const groundColour = new THREE.Color(0.7,0.7,0.78);
 groundMat.color = groundColour;
 
 class Building{
-    constructor(urbanness, create_position, pColor1, pColor2, pColor3)
+    constructor(urbanness, create_position, paramColours, type)
     {
         //console.log("Create new building at "+create_position.x+" "+create_position.y+" "+create_position.z);
         this.position = create_position;
@@ -20,8 +20,7 @@ class Building{
         this.bldg_mat;
         // In OOP we put this in a different function, so that it can have a custom definition
         // for descendant classes, but all other functionality is common to all. 
-        this.Generate(urbanness, pColor1, pColor2, pColor3);
-        
+        this.Generate(urbanness, paramColours, type);
               
         this.buildingMesh = new THREE.Mesh(this.bldg_geom, this.bldg_mat);
         //this.buildingMesh.receiveShadow = true;
@@ -43,31 +42,15 @@ class Building{
         scene.add(this.groundMesh);
     }
 
-    Generate(urbanness, pColor1, pColor2, pColor3){ // Overwrite this function in descendent classes to implement different building types. 
-        // console.log("Urbanness is "+urbanness);
-        // // 1: using the urbanness, determine which building to generate
-        // // lower to 0 = more chance of a house
-        // var threshold_highrise = 100 - urbanness;
-        // var buildingtype_rand = Math.random()*100;
-        // console.log(buildingtype_rand);
-        // // 2: using the urbanness, change the building size
-        // // lower to 0 = smaller building
-        // if (buildingtype_rand > threshold_highrise)
-        // {
-        //     console.log("Generate highrise");
-        //     this.buildingType = 1; // highrise
-        // }
-        // else{ 
-        //     console.log("Generate house"); 
-        //     this.buildingType = 0;
-        // }
+    //pColor1, pColor2, pColor3
+    Generate(urbanness, paramColours, type){ // Overwrite this function in descendent classes to implement different building types. 
         var singlehouseLength = blockLength - (blockLengthOffset * Math.random());
         this.height = building_baseheight[0] + randExtraHeight * Math.random() *2; // 2x for more varied building height
         // * building_height_randomness[this.buildingType] * Math.random()
         // would be good to add some random variation
         this.bldg_geom = new THREE.BoxGeometry(singlehouseLength, this.height, singlehouseLength);    
         this.bldg_mat = new THREE.MeshPhongMaterial();  
-        this.bldg_mat.color = pColor1;
+        this.bldg_mat.color = paramColours[0];
         //console.log(this.height);
     }
 
@@ -76,6 +59,8 @@ class Building{
         scene.remove(this.groundMesh);
         delete this.groundMesh;
         this.DestroyExtras();
+        scene.remove(this.groundMesh);
+        delete this.groundMesh;
         delete this.buildingMesh;
         delete this.height;
         delete this.buildingType;
