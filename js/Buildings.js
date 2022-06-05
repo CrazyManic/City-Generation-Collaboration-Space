@@ -10,7 +10,7 @@ const groundColour = new THREE.Color(0.7,0.7,0.78);
 groundMat.color = groundColour;
 
 class Building{
-    constructor(urbanness, create_position, paramColours, mesh_files)
+    constructor(urbanness, create_position, paramColours, type)
     {
         //console.log("Create new building at "+create_position.x+" "+create_position.y+" "+create_position.z);
         this.position = create_position;
@@ -20,8 +20,7 @@ class Building{
         this.bldg_mat;
         // In OOP we put this in a different function, so that it can have a custom definition
         // for descendant classes, but all other functionality is common to all. 
-        this.Generate(urbanness, paramColours, mesh_files);
-        
+        this.Generate(urbanness, paramColours, type);
               
         this.buildingMesh = new THREE.Mesh(this.bldg_geom, this.bldg_mat);
         //this.buildingMesh.receiveShadow = true;
@@ -44,7 +43,7 @@ class Building{
     }
 
     //pColor1, pColor2, pColor3
-    Generate(urbanness, paramColours, mesh_files){ // Overwrite this function in descendent classes to implement different building types. 
+    Generate(urbanness, paramColours, type){ // Overwrite this function in descendent classes to implement different building types. 
         var singlehouseLength = blockLength - (blockLengthOffset * Math.random());
         this.height = building_baseheight[0] + randExtraHeight * Math.random() *2; // 2x for more varied building height
         // * building_height_randomness[this.buildingType] * Math.random()

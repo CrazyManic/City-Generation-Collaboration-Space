@@ -53,7 +53,7 @@
     <script>
 
         var scene = new THREE.Scene();//create the scene
-
+        let basic_house_geos;
         var renderer = new THREE.WebGLRenderer();//create the webgl renderer
         renderer.setSize(window.innerWidth, window.innerHeight);
         //add the renderer to the current document
@@ -124,13 +124,8 @@
         var loaderMat = new THREE.MeshLambertMaterial();
         loaderMat.color = new THREE.Color(0.9,0.7,0.78);//0xAA2200;
         var loadMesh = null;
-        var scale = 0.45;
+        var scale = 0.8;
         var scaleVec = new THREE.Vector3(scale, scale, scale);
-        var center = new THREE.Vector3();
-        var size = new THREE.Vector3();
-        var sca = new THREE.Matrix4();
-        var tra = new THREE.Matrix4();
-        var rot = new THREE.Matrix4();
         var combined = new THREE.Matrix4();
         for (let loadIt=0; loadIt < modelFiles.length; loadIt++){
             stlloader.load(modelDirectory+modelFiles[loadIt], function (geometry) {
@@ -144,24 +139,20 @@
                 loadMesh.position.set(0,0,10*loadIt);
                 loadMesh.name = modelFiles[loadIt];
 
-                //scene.add(loadMesh);
                 models.push(loadMesh);
-                scene.add(loadMesh);
                 console.log('loaded mesh: ' + loadMesh.name);
                 CheckLoadingDone();
             });
         }
 
+        
         function CheckLoadingDone(){
-            if (models.length == modelFiles.length){
+            if (modelGeos.length == modelFiles.length){
                 meshLoadingDone = true;
                 console.log('Mesh loading check success.');
-                // for (let i=0; i<models.length; i++){
-                //     console.log('Mesh['+i+']: ' + models[i].name + ', geo: ');
-                //     console.log(modelGeos[i])
-                // }
+                basic_house_geos = [modelGeos[0], modelGeos[1], modelGeos[2]]; // body, roof, windows
                 // Generate world
-
+                BuildBlocks();
                 return true;
             }
             return false;
@@ -255,20 +246,6 @@
         //var endString = testString.slice(testString.length - 4);
         //console.log(endString);
 
-        // // testing linked list
-        // var list = new LinkedList();
-        // list.addNodeAtHead('start');
-        // console.log(list.size);
-        // console.log(list.getNodeAtIndex(0));
-        // list.addNodeAtTail('middle');
-        // list.addNodeAtTail('end');
-        // console.log(list.head);
-        // console.log(list.getNodeAtIndex(5));
-        // console.log(list.head.next.value);
-        // list.removeNodeAt(1);
-        // console.log(list.getNodeAtIndex(1));
-        // // end test linked list
-
         // movement variables
         var turnRight = false;
         var turnLeft = false;
@@ -278,36 +255,23 @@
         // Initialise blocks
         let blocks = new LinkedList();
         let intRad = (loadRadius / gridSize);
-        for (y = intRad; y >= -intRad; y--) {
-            for (x = intRad; x >= -intRad; x--) {
-                if ((x * x + y * y) <= intRad * intRad) {
-                    //console.log('(' + x + ',' + y+'): ('+ (x*gridSize) + ',' + (y*gridSize)+')');
-                    var newBlock = new Block(new THREE.Vector3(x * gridSize, 0.0, y * gridSize), scene);
-                    newBlock.position = new THREE.Vector3(x * gridSize, 0.0, y * gridSize);
-                    newBlock.floor.position = new THREE.Vector3(x * gridSize, 0.0, y * gridSize);
-                    blocks.addNodeAtTail(newBlock);
-                    //console.log("floor.pos: " + newBlock.floor.position + " pos: " + newBlock.position);
+        function BuildBlocks() {
+            for (y = intRad; y >= -intRad; y--) {
+                for (x = intRad; x >= -intRad; x--) {
+                    if ((x * x + y * y) <= intRad * intRad) {
+                        //console.log('(' + x + ',' + y+'): ('+ (x*gridSize) + ',' + (y*gridSize)+')');
+                        var newBlock = new Block(new THREE.Vector3(x * gridSize, 0.0, y * gridSize), scene);
+                        newBlock.position = new THREE.Vector3(x * gridSize, 0.0, y * gridSize);
+                        newBlock.floor.position = new THREE.Vector3(x * gridSize, 0.0, y * gridSize);
+                        blocks.addNodeAtTail(newBlock);
+                        //console.log("floor.pos: " + newBlock.floor.position + " pos: " + newBlock.position);
+                    }
+                    //else
+                    //    console.log('NOT (' + x + ',' + y+')');
                 }
-                //else
-                //    console.log('NOT (' + x + ',' + y+')');
             }
         }
-        //console.log(blocks.head.value.floor.position);
-        //console.log(blocks.head.next.value.floor.position);
-        //console.log(blocks.head.next.next.value.floor.position);
-        //box.position.set(blocks.head.next.next.value.floor.position);
         box.position.set(0, 0, 0);
-        //camera.lookAt(blocks.head.next.next.value.floor.position);
-        // for (rows=intRad; rows >= -intRad; rows--){
-        //     //var theta = Math.asin(rows/intRad);
-        //     var theta = Math.ceil(Math.acos(rows / intRad));
-        //     var genWidth = Math.ceil(intRad/2 * Math.acos(theta));
-        //     console.log("New row: " + rows + ", with width: " + genWidth + "\tTheta: " + theta + "\tacos: " + Math.acos(theta));
-        //     for (cols = genWidth; cols >= -genWidth; cols--){
-        //         //console.log("Adding block at: (" + cols + ", " + rows + ")");
-        //         //blocks.addNodeAtTail(new Block(new THREE.Vector3(rows * gridSize, cols*gridSize, 0.0)));
-        //     }
-        // }
 
         const clock = new THREE.Clock();
         //var delta = clock.getDelta(); // use this as necessary, just not in this scope.
@@ -477,7 +441,9 @@
             //camera.lookAt(playerPos.x, playerPos.y, playerPos.z);
 
             camera.updateProjectionMatrix();
-            UpdatePlayerPosition();
+            if (meshLoadingDone){
+                UpdatePlayerPosition();
+            }
 
             fogUpdate();
 
@@ -492,7 +458,8 @@
                     playerBike.visible = true;
             }
 
-            renderer.render(scene, camera);
+            //if (meshLoadingDone)
+                renderer.render(scene, camera);
         });
     </script>
     <script>

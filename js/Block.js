@@ -34,13 +34,22 @@ class Block {
         var randomBuildingSeed = cur_urbanness + THREE.Math.randInt(-randomOffset, randomOffset);
         if (randomBuildingSeed > highrise_threshold && randomBuildingSeed < highrise_min_threshold)
             this.building = new HighriseBuilding(cur_urbanness, this.position, [randCol]);
-        else if (randomBuildingSeed > house_threshold)
-            this.building = new Building(cur_urbanness, this.position, [randCol]);
+        else if (randomBuildingSeed > house_threshold){
+            if (Math.random() > 0.5)
+                this.building = new Building(cur_urbanness, this.position, [randCol]);
+            else 
+                this.building = new MeshBuilding(cur_urbanness, this.position, null, 0)
+        }
         else if (randomBuildingSeed > farmhouse_threshold)
             this.building = new FarmBuilding(cur_urbanness, this.position, [randCol]);
         else
             this.building = new GrassPlaneBuilding(cur_urbanness, this.position);
         
+        // Mesh building 
+        //console.log('block knows basic geos as: ');
+        //console.log(basic_house_geos);
+        
+
         // Roads
         this.roadGeoLong = new THREE.PlaneGeometry(streetWidth,gridSize);
         this.roadGeoShort = new THREE.PlaneGeometry(gridSize - streetWidth, streetWidth);
@@ -100,6 +109,10 @@ class Block {
         delete this;
     }
     
+}
+
+function RandRange(min, max){
+    return Math.random() * (max - min) + min;
 }
 
 const Blockf = function(position){

@@ -1,8 +1,41 @@
 const midGrey = new THREE.Color(0.5,0.5,0.5);
 
 class MeshBuilding extends Building {
-    Generate(urbanness, paramColours, mesh_files){
+    Generate(urbanness, paramColors, type){
         this.meshes = [];
+        var mesh_geos;
+        var materials;
+        console.log('Generating MeshBuilding with Type: ' + type);
+        //console.log('RandRange(0.6,1): '+RandRange(0.6,1));
+        switch (type){
+            case 0: // basic house
+                mesh_geos = basic_house_geos;
+                // Basic House   // body, roof, windows
+                var roofMat = new THREE.MeshLambertMaterial();
+                roofMat.color = new THREE.Color(RandRange(0.6,1), RandRange(0,0.8),RandRange(0,0.24));
+                var bodyMat = new THREE.MeshLambertMaterial();
+                bodyMat.color = new THREE.Color(Math.random(), Math.random(), Math.random());
+                var windowMat = new THREE.MeshPhongMaterial();
+                windowMat.shininess = RandRange(40,120);
+                windowMat.color = new THREE.Color(RandRange(0.1,0.9), RandRange(0.8,0.9),1);
+                materials = [bodyMat, roofMat, windowMat];
+                break;
+        }
+        // console.log('Mesh geometries: ');
+        // console.log(mesh_geos);
+        // console.log('Mesh geometries length: '+mesh_geos.length);
+        console.log('materials length: ' + materials.length);
+        var boringMat = new THREE.MeshLambertMaterial();
+        for (let i=0; i < mesh_geos.length; i++){
+            var mesh = new THREE.Mesh(mesh_geos[i], materials[i]);
+            mesh.applyMatrix4(bikeRotationMatrix);
+            mesh.scale.set(scaleVec.x, scaleVec.y, scaleVec.z);
+            mesh.position.set(this.position.x, this.position.y, this.position.z);
+            mesh.castShadow = true;
+            mesh.recieveShadow = true;
+            this.meshes.push(mesh);
+            scene.add(mesh);
+        }
         //console.log("Generating MeshBuilding");
         // for (var i=0; i < mesh_files.length; i++){
         //     var itMesh;
