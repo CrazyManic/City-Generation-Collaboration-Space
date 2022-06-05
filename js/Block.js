@@ -40,10 +40,14 @@ class Block {
             else 
                 this.building = new MeshBuilding(cur_urbanness, this.position, null, 0)
         }
+        else if (Math.random() > 0.66){
+            this.building = new MeshBuilding(cur_urbanness, this.position, null, 1)
+        }
         else if (randomBuildingSeed > farmhouse_threshold)
             this.building = new FarmBuilding(cur_urbanness, this.position, [randCol]);
         else
             this.building = new GrassPlaneBuilding(cur_urbanness, this.position);
+        
         
         // Mesh building 
         //console.log('block knows basic geos as: ');

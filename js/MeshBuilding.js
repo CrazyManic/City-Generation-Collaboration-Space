@@ -20,6 +20,16 @@ class MeshBuilding extends Building {
                 windowMat.color = new THREE.Color(RandRange(0.1,0.9), RandRange(0.8,0.9),1);
                 materials = [bodyMat, roofMat, windowMat];
                 break;
+            case 1:
+                mesh_geos = playground_geos;
+                var towerMat = new THREE.MeshLambertMaterial();
+                towerMat.color = new THREE.Color(RandRange(0.33,0.66), RandRange(0.15,0.45),RandRange(0.1,0.3));
+                var slideMat = new THREE.MeshPhongMaterial();
+                slideMat.shininess = RandRange(30,60);
+                slideMat.color = new THREE.Color(RandRange(0.67,0.98), RandRange(0.5,0.9),0);
+                var seesawMat = new THREE.MeshLambertMaterial();
+                seesawMat.color = new THREE.Color(RandRange(0,0.08), RandRange(0.5,0.85),RandRange(0.78,0.95));
+                materials = [towerMat, slideMat, seesawMat];
         }
         // console.log('Mesh geometries: ');
         // console.log(mesh_geos);

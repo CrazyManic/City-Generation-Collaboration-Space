@@ -54,6 +54,7 @@
 
         var scene = new THREE.Scene();//create the scene
         let basic_house_geos;
+        let playground_geos;
         var renderer = new THREE.WebGLRenderer();//create the webgl renderer
         renderer.setSize(window.innerWidth, window.innerHeight);
         //add the renderer to the current document
@@ -116,7 +117,8 @@
 
         // MESHES
         const modelDirectory = 'models/';
-        const modelFiles = ['basic house body.stl','basic house roof.stl','basic house windows.stl'];//'basic house full.stl'
+        const modelFiles = ['basic house body.stl','basic house roof.stl','basic house windows.stl', 
+            'pg tower.stl', 'pg slide and ladder.stl', 'pg seesaw.stl'];
         var models = [];
         var modelGeos = [];
         var meshLoadingDone = false;
@@ -150,7 +152,8 @@
             if (modelGeos.length == modelFiles.length){
                 meshLoadingDone = true;
                 console.log('Mesh loading check success.');
-                basic_house_geos = [modelGeos[0], modelGeos[1], modelGeos[2]]; // body, roof, windows
+                basic_house_geos = [modelGeos[0], modelGeos[1], modelGeos[2]];  // body, roof, windows
+                playground_geos = [modelGeos[3], modelGeos[4], modelGeos[5]];   // tower, slide, seesaw
                 // Generate world
                 BuildBlocks();
                 return true;
