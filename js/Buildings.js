@@ -1,5 +1,5 @@
 // 0 - house, 1 - highrise
-const building_baseheight = [10, 35];
+const building_baseheight = [3, 35];
 const building_height_randomness = [1.2, 1.7]; // as of right now, unused :(
 const blockLength = gridSize - streetWidth;
 const blockLengthOffset = 10; // change this to modifiy how wide the building is (used in regular buildings)
@@ -26,6 +26,7 @@ class Building{
         this.buildingMesh = new THREE.Mesh(this.bldg_geom, this.bldg_mat);
         //this.buildingMesh.receiveShadow = true;
         this.buildingMesh.castShadow = true;
+        this.buildingMesh.receiveShadow = true;
 
         // set building position to the given coordinates
         this.buildingMesh.position.x = create_position.x;
@@ -73,6 +74,8 @@ class Building{
 
     Destroy(){
         scene.remove(this.buildingMesh);
+        scene.remove(this.groundMesh);
+        delete this.groundMesh;
         this.DestroyExtras();
         scene.remove(this.groundMesh);
         delete this.groundMesh;

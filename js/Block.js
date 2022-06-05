@@ -5,9 +5,11 @@ const streetWidth = 5;
 const buildingWidth = gridSize - streetWidth;
 const flatRotation = -Math.PI / 2;
 const randomOffset = 30;
+const highrise_min_threshold = 50;
 const highrise_threshold = 70;
 const house_threshold = 20;
 const farmhouse_threshold = 10;
+const grassplane_threshold = 7;
 
 class Block {
     constructor(position, scene) {
@@ -30,17 +32,14 @@ class Block {
         var randCol = new THREE.Color(Math.random(), Math.random(), Math.random());
         // Decide on the building with some randomness
         var randomBuildingSeed = cur_urbanness + THREE.Math.randInt(-randomOffset, randomOffset);
-        if (randomBuildingSeed > highrise_threshold)
-            this.building = new HighriseBuilding(cur_urbanness, this.position, [randCol]);
-        else{
-            // testing mesh building
-            this.building = new MeshBuilding(cur_urbanness, this.position, [randCol], ["basic house 1 whole.ply"]);
-        }
-        // the real else statements
-        // else if (randomBuildingSeed > house_threshold)
-        //     this.building = new Building(cur_urbanness, this.position, [randCol]);
-        // else 
-        //     this.building = new FarmBuilding(cur_urbanness, this.position, [randCol]);
+        if (randomBuildingSeed > highrise_threshold && randomBuildingSeed < highrise_min_threshold)
+            this.building = new HighriseBuilding(cur_urbanness, this.position, randCol);
+        else if (randomBuildingSeed > house_threshold)
+            this.building = new Building(cur_urbanness, this.position, randCol);
+        else if (randomBuildingSeed > farmhouse_threshold)
+            this.building = new FarmBuilding(cur_urbanness, this.position, randCol);
+        else
+            this.building = new GrassPlaneBuilding(cur_urbanness, this.position);
         
         // Roads
         this.roadGeoLong = new THREE.PlaneGeometry(streetWidth,gridSize);
